@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import api from "../../lib/api";
 import { Lock, Store } from "lucide-react";
 import toast from "react-hot-toast";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function ResetPassword() {
+function ResetPasswordForm() {
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -113,5 +113,17 @@ export default function ResetPassword() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ResetPassword() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            </div>
+        }>
+            <ResetPasswordForm />
+        </Suspense>
     );
 }
