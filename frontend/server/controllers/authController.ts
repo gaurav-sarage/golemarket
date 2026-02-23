@@ -19,7 +19,8 @@ const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
     const options = {
         expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production'
+        secure: process.env.NODE_ENV === 'production',
+        path: '/'
     };
 
     res.status(statusCode)
@@ -140,9 +141,11 @@ export const loginShopOwner = async (req: Request, res: Response): Promise<void>
 };
 
 export const logout = (req: Request, res: Response): void => {
-    res.clearCookie('token', {
+    res.cookie('token', 'none', {
+        expires: new Date(Date.now() - 10 * 1000),
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production'
+        secure: process.env.NODE_ENV === 'production',
+        path: '/'
     });
     res.status(200).json({ success: true, data: {} });
 };

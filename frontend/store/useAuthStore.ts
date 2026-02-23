@@ -28,6 +28,9 @@ export const useAuthStore = create<AuthState>((set) => ({
             await api.get('/auth/logout');
             set({ user: null, isAuthenticated: false });
             useCartStore.getState().clearCart();
+            if (typeof window !== 'undefined') {
+                window.location.href = '/';
+            }
         } catch (err) {
             console.error('Logout failed', err);
         }
