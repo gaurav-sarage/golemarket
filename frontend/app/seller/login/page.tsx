@@ -6,11 +6,12 @@ import api from "../../../lib/api";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { Store, Mail, Lock, Building } from "lucide-react";
+import { Store, Mail, Lock, Building, Eye, EyeOff } from "lucide-react";
 
 export default function SellerLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const login = useAuthStore((state) => state.login);
@@ -81,13 +82,20 @@ export default function SellerLogin() {
                                     <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="focus:ring-secondary-500 focus:border-secondary-500 block w-full pl-10 h-12 sm:text-sm border-gray-300 rounded-xl bg-gray-50 outline-none border focus:bg-white transition-all"
+                                    className="focus:ring-secondary-500 focus:border-secondary-500 block w-full pl-10 pr-10 h-12 sm:text-sm border-gray-300 rounded-xl bg-gray-50 outline-none border focus:bg-white transition-all"
                                     placeholder="••••••••"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                >
+                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                </button>
                             </div>
                         </div>
 

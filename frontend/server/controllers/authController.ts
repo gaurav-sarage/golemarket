@@ -58,7 +58,8 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
         user = await User.create({ name, email, password: hashedPassword, phone, role: 'customer', verificationToken });
 
-        const verifyUrl = `http://localhost:3000/verify-email?token=${verificationToken}`;
+        const clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? `https://${req.get('host')}` : 'http://localhost:3000');
+        const verifyUrl = `${clientUrl}/verify-email?token=${verificationToken}`;
         await sendEmail({
             email,
             subject: 'Email Verification - Gole Market Hub',
@@ -105,7 +106,8 @@ export const registerShopOwner = async (req: Request, res: Response): Promise<vo
 
         owner = await ShopOwner.create({ name, email, password: hashedPassword, phone, role: 'shop_owner', verificationToken });
 
-        const verifyUrl = `http://localhost:3000/verify-email?token=${verificationToken}`;
+        const clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? `https://${req.get('host')}` : 'http://localhost:3000');
+        const verifyUrl = `${clientUrl}/verify-email?token=${verificationToken}`;
         await sendEmail({
             email,
             subject: 'Seller Account Verification - Gole Market Hub',
@@ -208,7 +210,8 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         account.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000) as any; // 10 minutes
         await account.save({ validateBeforeSave: false });
 
-        const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+        const clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? `https://${req.get('host')}` : 'http://localhost:3000');
+        const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
         try {
             await sendEmail({
                 email: account.email,
