@@ -8,7 +8,8 @@ import {
     logout,
     verifyEmail,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    updateProfile
 } from '../controllers/authController';
 import { protect } from '../middleware/auth';
 
@@ -20,6 +21,7 @@ router.post('/shop-owner/register', registerShopOwner);
 router.post('/shop-owner/login', loginShopOwner);
 router.get('/logout', logout);
 router.get('/me', protect, getMe);
+router.put('/me', protect, updateProfile);
 
 router.get('/verify-email/:token', verifyEmail);
 router.post('/forgot-password', forgotPassword);

@@ -142,9 +142,33 @@ export const loginShopOwner = async (req: Request, res: Response): Promise<void>
 export const logout = (req: Request, res: Response): void => {
     res.cookie('token', 'none', {
         expires: new Date(Date.now() + 10 * 1000),
-        httpOnly: true
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production'
     });
     res.status(200).json({ success: true, data: {} });
+};
+
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const payload = (req as any).user;
+        const { name, phone } = req.body;
+
+        let Model: any = payload.role === 'customer' || payload.role === 'admin' ? User : ShopOwner;
+        const updatedUser = await Model.findByIdAndUpdate(
+            payload.id,
+            { name, phone },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            res.status(404).json({ success: false, message: 'User not found' });
+            return;
+        }
+
+        res.status(200).json({ success: true, data: updatedUser });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 };
 
 export const getMe = async (req: Request, res: Response): Promise<void> => {

@@ -5,6 +5,7 @@ import api from "../../../lib/api";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store } from "lucide-react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function SellerDashboard() {
     const { user } = useAuthStore();
@@ -13,8 +14,11 @@ export default function SellerDashboard() {
     const [products, setProducts] = useState<any[]>([]);
     const [orders, setOrders] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders'>('analytics');
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [needsSetup, setNeedsSetup] = useState(false);
+
+    const { isAuthenticated, isLoading: isAuthLoading, checkAuth } = useAuthStore();
+    const router = useRouter();
 
     // Setup shop state
     const [shopForm, setShopForm] = useState({
@@ -30,8 +34,12 @@ export default function SellerDashboard() {
     });
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (!isAuthLoading && !isAuthenticated) {
+            router.push('/seller/login');
+        } else if (isAuthenticated) {
+            fetchData();
+        }
+    }, [isAuthLoading, isAuthenticated, router]);
 
     const fetchData = async () => {
         setIsLoading(true);
