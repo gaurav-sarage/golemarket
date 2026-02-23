@@ -56,33 +56,46 @@ export default function Home() {
 
         <div className="max-w-5xl mx-auto relative z-10 w-full">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, rotateX: -25, y: 60, scale: 0.9 }}
+            animate={{ opacity: 1, rotateX: 0, y: 0, scale: 1 }}
+            transition={{ duration: 1.2, type: "spring", bounce: 0.4 }}
             className="flex flex-col items-center"
+            style={{ perspective: 1200 }}
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[2rem] bg-primary-50 text-primary-700 font-bold text-xs sm:text-sm mb-6 sm:mb-8 border border-primary-100 shadow-sm transition-transform hover:scale-105">
               <Store className="w-4 h-4" />
-              <span>The Future of Local Commerce</span>
+              <span>Next-Gen Local Discovery</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-extrabold text-gray-900 tracking-tight leading-none mb-6">
-              All Your Local Shops.<br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500 py-2 inline-block">One Marketplace.</span>
-            </h1>
+            <motion.h1
+              initial={{ opacity: 0, rotateY: 20 }}
+              animate={{ opacity: 1, rotateY: 0 }}
+              transition={{ delay: 0.3, duration: 0.9, type: "spring" }}
+              className="text-5xl sm:text-7xl md:text-8xl font-heading font-extrabold text-gray-900 tracking-tight leading-[1.05] mb-6"
+            >
+              Your Entire City.<br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500 py-2 inline-block drop-shadow-sm">In Your Pocket.</span>
+            </motion.h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto font-medium">
-              Experience the magic of your community marketplace. Shop thousands of unique products from verified local sellers, anywhere, anytime.
-            </p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+              className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto font-medium leading-relaxed"
+            >
+              Step into the smart way to shop local. Instant access to the finest neighborhood merchants, curated exactly for you.
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto px-4 sm:px-0">
-              <Link href="/shops" className="w-full sm:w-auto px-8 sm:px-10 py-4 rounded-2xl bg-gray-900 text-white font-bold flex items-center justify-center gap-2 hover:bg-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 text-lg">
-                Shop Now <ArrowRight className="w-5 h-5" />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.8 }}
+              className="flex justify-center w-full px-4 sm:px-0"
+            >
+              <Link href="/shops" className="w-full sm:w-auto px-10 py-5 rounded-3xl bg-gray-900 text-white font-black flex items-center justify-center gap-3 hover:bg-gray-800 hover:shadow-2xl hover:shadow-gray-900/20 hover:-translate-y-1 transition-all active:scale-95 text-lg">
+                Explore The Market <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link href="/seller/register" className="w-full sm:w-auto px-8 sm:px-10 py-4 rounded-2xl bg-white text-gray-900 font-bold border-2 border-gray-100 hover:border-gray-200 hover:shadow-md transition-all active:scale-95 text-lg flex items-center justify-center gap-2">
-                Open Your Store
-              </Link>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>

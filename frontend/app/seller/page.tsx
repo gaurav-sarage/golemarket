@@ -47,33 +47,46 @@ export default function SellerHome() {
 
                 <div className="max-w-5xl mx-auto relative z-10 w-full">
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
+                        initial={{ opacity: 0, rotateX: 25, y: -60, scale: 0.95 }}
+                        animate={{ opacity: 1, rotateX: 0, y: 0, scale: 1 }}
+                        transition={{ duration: 1.2, type: "spring", bounce: 0.4 }}
                         className="flex flex-col items-center"
+                        style={{ perspective: 1200 }}
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[2rem] bg-indigo-50 text-indigo-700 font-bold text-xs sm:text-sm mb-6 sm:mb-8 border border-indigo-100 shadow-sm">
                             <Store className="w-4 h-4" />
                             <span>GoleMarket for Merchants</span>
                         </div>
 
-                        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-extrabold text-slate-900 tracking-tight leading-none mb-6">
-                            Grow Your Local Business.<br className="hidden sm:block" />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500 py-2 inline-block">Digitally.</span>
-                        </h1>
+                        <motion.h1
+                            initial={{ opacity: 0, rotateY: -20 }}
+                            animate={{ opacity: 1, rotateY: 0 }}
+                            transition={{ delay: 0.3, duration: 0.9, type: "spring" }}
+                            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6"
+                        >
+                            Sell Everywhere.<br className="hidden sm:block" />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500 py-2 inline-block">Without Boundaries.</span>
+                        </motion.h1>
 
-                        <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto font-medium leading-relaxed">
-                            Join hundreds of local vendors turning their physical storefronts into 24/7 digital powerhouses. Manage your inventory, track orders, and reach new customers today.
-                        </p>
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5, duration: 0.8 }}
+                            className="text-lg sm:text-xl md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto font-medium leading-relaxed"
+                        >
+                            An absolute shift in neighborhood retail. Onboard your localized catalog in minutes and unlock pure digital scalability without the upfront technical hassle.
+                        </motion.p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto px-4 sm:px-0">
-                            <Link href="/seller/register" className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-indigo-600 text-white font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 text-lg">
-                                Create Account <ArrowRight className="w-5 h-5" />
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.7, duration: 0.8 }}
+                            className="flex justify-center w-full px-4 sm:px-0"
+                        >
+                            <Link href="/seller/register" className="w-full sm:w-auto px-12 py-5 rounded-3xl bg-indigo-600 text-white font-black flex items-center justify-center gap-3 hover:bg-indigo-700 hover:shadow-2xl hover:shadow-indigo-500/30 hover:-translate-y-1 transition-all active:scale-95 text-xl">
+                                Initialize Your Shop <ArrowRight className="w-6 h-6" />
                             </Link>
-                            <Link href="/seller/login" className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-white text-slate-900 font-bold border-2 border-slate-200 hover:border-indigo-600 hover:text-indigo-600 hover:shadow-md transition-all active:scale-95 text-lg flex items-center justify-center gap-2">
-                                Merchant Login
-                            </Link>
-                        </div>
+                        </motion.div>
                     </motion.div>
                 </div>
             </section>

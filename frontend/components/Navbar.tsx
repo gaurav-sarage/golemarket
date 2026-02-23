@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Store, ShoppingCart, Search, User, LogOut, Package, Menu, X, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import CartDrawer from "./CartDrawer";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCartStore } from "../store/useCartStore";
@@ -12,6 +13,8 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user, isAuthenticated, logout, checkAuth } = useAuthStore();
     const { shops, fetchCart } = useCartStore();
+    const pathname = usePathname();
+    const isSellerPath = pathname?.startsWith('/seller');
 
     useEffect(() => {
         checkAuth();
@@ -57,7 +60,7 @@ export default function Navbar() {
 
                         {/* Actions - Right (Desktop & Tablet) */}
                         <div className="hidden md:flex items-center justify-end gap-3 lg:gap-4 flex-shrink-0">
-                            {user?.role !== 'shop_owner' && user?.role !== 'admin' && (
+                            {!isSellerPath && user?.role !== 'shop_owner' && user?.role !== 'admin' && (
                                 <button
                                     onClick={() => setIsCartOpen(true)}
                                     className="relative p-3 text-gray-600 hover:text-primary-600 bg-white hover:bg-primary-50 active:scale-95 rounded-2xl transition-all border-2 border-gray-100 shadow-sm hover:border-primary-100"
@@ -103,10 +106,10 @@ export default function Navbar() {
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-3 lg:gap-4 pl-3 lg:pl-4 border-l-2 border-gray-100">
-                                    <Link href="/login" className="flex items-center gap-2 text-gray-600 hover:text-primary-600 font-bold px-5 py-3 rounded-2xl hover:bg-primary-50 transition-all active:scale-95 border-2 border-transparent hover:border-primary-100">
+                                    <Link href={isSellerPath ? "/seller/login" : "/login"} className="flex items-center gap-2 text-gray-600 hover:text-primary-600 font-bold px-5 py-3 rounded-2xl hover:bg-primary-50 transition-all active:scale-95 border-2 border-transparent hover:border-primary-100">
                                         Sign In
                                     </Link>
-                                    <Link href="/register" className="flex items-center gap-2 text-white bg-gray-900 hover:bg-gray-800 font-bold px-6 py-3 rounded-2xl transition-all hover:shadow-lg active:scale-95">
+                                    <Link href={isSellerPath ? "/seller/register" : "/register"} className="flex items-center gap-2 text-white bg-gray-900 hover:bg-gray-800 font-bold px-6 py-3 rounded-2xl transition-all hover:shadow-lg active:scale-95">
                                         Sign Up
                                     </Link>
                                 </div>
@@ -115,7 +118,7 @@ export default function Navbar() {
 
                         {/* Mobile Menu Toggle button */}
                         <div className="flex md:hidden items-center gap-4">
-                            {user?.role !== 'shop_owner' && user?.role !== 'admin' && (
+                            {!isSellerPath && user?.role !== 'shop_owner' && user?.role !== 'admin' && (
                                 <button
                                     onClick={() => setIsCartOpen(true)}
                                     className="relative p-2 text-gray-600 bg-gray-50 rounded-xl border border-gray-100"
@@ -183,15 +186,17 @@ export default function Navbar() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 gap-3">
-                                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 p-3 sm:p-4 bg-white border-2 border-gray-200 rounded-xl sm:rounded-2xl font-bold text-gray-700 hover:bg-gray-50 active:scale-95 transition-all">
-                                        <User className="w-5 h-5" /> Sign In to Account
+                                    <Link href={isSellerPath ? "/seller/login" : "/login"} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 p-3 sm:p-4 bg-white border-2 border-gray-200 rounded-xl sm:rounded-2xl font-bold text-gray-700 hover:bg-gray-50 active:scale-95 transition-all">
+                                        <User className="w-5 h-5" /> Sign In
                                     </Link>
-                                    <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 p-3 sm:p-4 bg-gray-900 border-2 border-gray-900 rounded-xl sm:rounded-2xl font-bold text-white hover:bg-gray-800 active:scale-95 transition-all">
-                                        <ArrowRight className="w-5 h-5" /> Create Customer Account
+                                    <Link href={isSellerPath ? "/seller/register" : "/register"} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 p-3 sm:p-4 bg-gray-900 border-2 border-gray-900 rounded-xl sm:rounded-2xl font-bold text-white hover:bg-gray-800 active:scale-95 transition-all">
+                                        <ArrowRight className="w-5 h-5" /> Sign Up
                                     </Link>
-                                    <Link href="/seller/register" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 p-3 sm:p-4 bg-primary-50 border-2 border-primary-100 rounded-xl sm:rounded-2xl font-bold text-primary-700 hover:bg-primary-100 active:scale-95 transition-all">
-                                        <Store className="w-5 h-5" /> Open a Shop
-                                    </Link>
+                                    {!isSellerPath && (
+                                        <Link href="/seller/register" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 p-3 sm:p-4 bg-primary-50 border-2 border-primary-100 rounded-xl sm:rounded-2xl font-bold text-primary-700 hover:bg-primary-100 active:scale-95 transition-all">
+                                            <Store className="w-5 h-5" /> Open a Shop
+                                        </Link>
+                                    )}
                                 </div>
                             )}
                         </div>
