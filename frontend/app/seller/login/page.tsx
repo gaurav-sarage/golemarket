@@ -6,7 +6,7 @@ import api from "../../../lib/api";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { Store, Mail, Lock, Building, Eye, EyeOff } from "lucide-react";
+import { Store, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function SellerLogin() {
     const [email, setEmail] = useState("");
@@ -23,7 +23,7 @@ export default function SellerLogin() {
             const { data } = await api.post("/auth/shop-owner/login", { email, password });
             if (data.success) {
                 login(data.user);
-                toast.success("Welcome back, Shop Owner!");
+                toast.success("Welcome back to Seller Dashboard!", { duration: 4000 });
                 router.push("/seller/dashboard");
             }
         } catch (err: any) {
@@ -34,29 +34,63 @@ export default function SellerLogin() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="mx-auto flex justify-center w-fit p-3 bg-secondary-100 rounded-full text-secondary-600 mb-6 border border-secondary-200">
-                    <Building className="w-10 h-10" />
+        <div className="min-h-screen bg-white flex">
+            {/* Left Panel - Image/Branding */}
+            <div className="hidden lg:flex w-1/2 bg-secondary-900 flex-col justify-between p-12 relative overflow-hidden">
+                <div className="absolute inset-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80"
+                        alt="Seller Dashboard"
+                        className="w-full h-full object-cover opacity-50 mix-blend-overlay"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-secondary-900 via-secondary-900/60 to-transparent" />
                 </div>
-                <h2 className="text-center text-3xl font-heading font-extrabold text-gray-900">
-                    Seller Portal Sign In
-                </h2>
-                <p className="mt-2 text-center text-sm text-gray-600">
-                    Or{" "}
-                    <Link href="/seller/register" className="font-medium text-secondary-600 hover:text-secondary-500">
-                        register to sell your products
-                    </Link>
-                </p>
+
+                <Link href="/" className="relative z-10 flex items-center gap-2 text-white group w-fit">
+                    <div className="p-2 bg-white/20 backdrop-blur-md rounded-xl group-hover:scale-105 transition-transform">
+                        <Store className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="font-heading font-extrabold text-2xl tracking-tight">
+                        GoleCentral
+                    </span>
+                </Link>
+
+                <div className="relative z-10 text-white max-w-md">
+                    <h2 className="text-4xl font-heading font-bold mb-4 leading-tight">Empower your local business today.</h2>
+                    <p className="text-secondary-100 text-lg mb-8">Manage orders, track analytics, and build your digital storefront all in one dashboard.</p>
+                </div>
             </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-white py-8 px-4 shadow-xl shadow-secondary-500/5 sm:rounded-2xl sm:px-10 border border-secondary-100">
+            {/* Right Panel - Login Form */}
+            <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 px-8 sm:px-16 xl:px-24">
+                <div className="w-full max-w-md mx-auto">
+                    <div className="mb-10 text-center lg:text-left">
+                        <div className="flex justify-center lg:hidden mb-8">
+                            <Link href="/" className="flex items-center gap-2">
+                                <div className="p-2 bg-secondary-100 rounded-xl">
+                                    <Store className="h-6 w-6 text-secondary-600" />
+                                </div>
+                                <span className="font-heading font-extrabold text-2xl tracking-tight text-gray-900">
+                                    GoleCentral
+                                </span>
+                            </Link>
+                        </div>
+                        <h2 className="text-3xl font-heading font-extrabold text-gray-900 mb-2">
+                            Seller Login
+                        </h2>
+                        <p className="text-gray-500">
+                            Don't have a seller account?{" "}
+                            <Link href="/seller/register" className="font-bold text-secondary-600 hover:text-secondary-500 underline decoration-secondary-600/30 underline-offset-4 transition-all">
+                                Apply to sell
+                            </Link>
+                        </p>
+                    </div>
+
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Business Email</label>
-                            <div className="mt-1 relative rounded-md shadow-sm">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Business Email</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Mail className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
@@ -64,21 +98,21 @@ export default function SellerLogin() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="focus:ring-secondary-500 focus:border-secondary-500 block w-full pl-10 h-12 sm:text-sm border-gray-300 rounded-xl bg-gray-50 outline-none border focus:bg-white transition-all"
+                                    className="focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 block w-full pl-12 h-14 sm:text-sm border-gray-200 rounded-2xl bg-gray-50 outline-none border focus:bg-white transition-all font-medium text-gray-900 placeholder-gray-400 shadow-sm"
                                     placeholder="shop@example.com"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <div className="flex justify-between mb-1">
-                                <label className="block text-sm font-medium text-gray-700">Password</label>
-                                <Link href="/forgot-password" className="text-sm font-medium text-secondary-600 hover:text-secondary-500">
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="block text-sm font-bold text-gray-700">Password</label>
+                                <Link href="/forgot-password" className="text-sm font-bold text-secondary-600 hover:text-secondary-500 transition-colors">
                                     Forgot password?
                                 </Link>
                             </div>
-                            <div className="mt-1 relative rounded-md shadow-sm">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
@@ -86,33 +120,31 @@ export default function SellerLogin() {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="focus:ring-secondary-500 focus:border-secondary-500 block w-full pl-10 pr-10 h-12 sm:text-sm border-gray-300 rounded-xl bg-gray-50 outline-none border focus:bg-white transition-all"
+                                    className="focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 block w-full pl-12 pr-12 h-14 sm:text-sm border-gray-200 rounded-2xl bg-gray-50 outline-none border focus:bg-white transition-all font-medium text-gray-900 placeholder-gray-400 shadow-sm"
                                     placeholder="••••••••"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                 </button>
                             </div>
                         </div>
 
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full h-12 flex justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-secondary-600 hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 transition-all items-center gap-2"
-                            >
-                                {isLoading ? "Signing in..." : "Access Dashboard"}
-                            </button>
-                        </div>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full h-14 flex justify-center py-2 px-4 border border-transparent rounded-2xl shadow-sm text-base font-bold text-white bg-secondary-900 hover:bg-secondary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-900 transition-all items-center gap-2 active:scale-[0.98]"
+                        >
+                            {isLoading ? "Signing in..." : "Enter Dashboard"}
+                        </button>
                     </form>
 
-                    <div className="mt-6 border-t border-gray-100 pt-6">
-                        <Link href="/login" className="w-full flex justify-center py-2 px-4 text-sm font-medium rounded-xl text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors">
-                            I'm a Customer
+                    <div className="mt-10 pt-6 border-t border-gray-100 flex flex-col gap-4">
+                        <Link href="/login" className="w-full h-12 flex items-center justify-center px-4 text-sm font-bold rounded-xl text-gray-600 bg-white border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-all">
+                            Are you a Customer? Sign in here
                         </Link>
                     </div>
                 </div>
