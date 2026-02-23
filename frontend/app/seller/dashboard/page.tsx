@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle } from "lucide-react";
+import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle, Edit, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -26,10 +26,12 @@ export default function SellerDashboard() {
     });
     const [shopLogoFile, setShopLogoFile] = useState<File | null>(null);
 
-    // New product state
+    // New product / Edit product state
     const [isAddingProduct, setIsAddingProduct] = useState(false);
+    const [isEditingProduct, setIsEditingProduct] = useState(false);
+    const [editingProductId, setEditingProductId] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
-    const [newProduct, setNewProduct] = useState<any>({
+    const INITIAL_PRODUCT_STATE = {
         name: '', description: '', price: '', salePrice: '', sku: '', stockQuantity: '', categoryId: '',
         foodCategory: 'Veg', preparationTime: '', portionSize: '', stockLimitPerDay: '',
         categoryName: '', subCategoryName: '', unitType: 'Piece', minimumOrderQuantity: '', expiryDate: '',
@@ -37,7 +39,8 @@ export default function SellerDashboard() {
         deliveryEligibility: true, pickupAvailability: true, trackInventory: true,
         appointmentRequired: false, taxIndicator: false,
         productStatus: 'Published', availabilityStatus: 'Available'
-    });
+    };
+    const [newProduct, setNewProduct] = useState<any>(INITIAL_PRODUCT_STATE);
 
     useEffect(() => {
         if (!isAuthLoading && !isAuthenticated) {
@@ -125,7 +128,7 @@ export default function SellerDashboard() {
         try {
             const formData = new FormData();
             Object.keys(newProduct).forEach(key => {
-                if (newProduct[key] !== '' && newProduct[key] !== undefined) {
+                if (newProduct[key] !== '' && newProduct[key] !== undefined && newProduct[key] !== null) {
                     formData.append(key, String(newProduct[key]));
                 }
             });
@@ -138,25 +141,26 @@ export default function SellerDashboard() {
                 formData.append('image', imageFile);
             }
 
-            const { data } = await api.post('/products', formData, {
+            const endpoint = isEditingProduct ? `/products/${editingProductId}` : '/products';
+            const method = isEditingProduct ? 'put' : 'post';
+
+            const { data } = await api[method](endpoint, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
 
             if (data.success) {
-                toast.success("Product added!");
-                setProducts([...products, data.data]);
+                toast.success(isEditingProduct ? "Product updated!" : "Product added!");
+                if (isEditingProduct) {
+                    setProducts(products.map(p => p._id === editingProductId ? data.data : p));
+                } else {
+                    setProducts([...products, data.data]);
+                }
                 setIsAddingProduct(false);
-                setNewProduct({
-                    name: '', description: '', price: '', salePrice: '', sku: '', stockQuantity: '', categoryId: '',
-                    foodCategory: 'Veg', preparationTime: '', portionSize: '', stockLimitPerDay: '',
-                    categoryName: '', subCategoryName: '', unitType: 'Piece', minimumOrderQuantity: '', expiryDate: '',
-                    serviceDuration: '', vehicleCompatibility: '', availableDays: '',
-                    deliveryEligibility: true, pickupAvailability: true, trackInventory: true,
-                    appointmentRequired: false, taxIndicator: false,
-                    productStatus: 'Published', availabilityStatus: 'Available'
-                });
+                setIsEditingProduct(false);
+                setEditingProductId(null);
+                setNewProduct(INITIAL_PRODUCT_STATE);
                 setImageFile(null);
 
                 // Refresh analytics to update stats quickly
@@ -164,8 +168,43 @@ export default function SellerDashboard() {
                 if (analyticsRes.data.success) setAnalytics(analyticsRes.data.data);
             }
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Failed to add product");
+            toast.error(err.response?.data?.message || `Failed to ${isEditingProduct ? 'update' : 'add'} product`);
         }
+    };
+
+    const handleEditClick = (product: any) => {
+        setNewProduct({
+            name: product.name || '',
+            description: product.description || '',
+            price: product.price || '',
+            salePrice: product.salePrice || '',
+            sku: product.sku || '',
+            stockQuantity: product.stockQuantity || '',
+            categoryId: product.categoryId || '',
+            foodCategory: product.foodCategory || 'Veg',
+            preparationTime: product.preparationTime || '',
+            portionSize: product.portionSize || '',
+            stockLimitPerDay: product.stockLimitPerDay || '',
+            categoryName: product.categoryName || '',
+            subCategoryName: product.subCategoryName || '',
+            unitType: product.unitType || 'Piece',
+            minimumOrderQuantity: product.minimumOrderQuantity || '',
+            expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : '',
+            serviceDuration: product.serviceDuration || '',
+            vehicleCompatibility: product.vehicleCompatibility || '',
+            availableDays: product.availableDays || '',
+            deliveryEligibility: product.deliveryEligibility ?? true,
+            pickupAvailability: product.pickupAvailability ?? true,
+            trackInventory: product.trackInventory ?? true,
+            appointmentRequired: product.appointmentRequired ?? false,
+            taxIndicator: product.taxIndicator ?? false,
+            productStatus: product.productStatus || 'Published',
+            availabilityStatus: product.availabilityStatus || 'Available'
+        });
+        setEditingProductId(product._id);
+        setIsEditingProduct(true);
+        setIsAddingProduct(true); // Share the same form visibility
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleDeleteProduct = async (id: string) => {
@@ -363,17 +402,27 @@ export default function SellerDashboard() {
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold text-gray-900">Manage Inventory</h2>
                             <button
-                                onClick={() => setIsAddingProduct(!isAddingProduct)}
+                                onClick={() => {
+                                    if (isAddingProduct) {
+                                        setIsAddingProduct(false);
+                                        setIsEditingProduct(false);
+                                        setEditingProductId(null);
+                                        setNewProduct(INITIAL_PRODUCT_STATE);
+                                    } else {
+                                        setIsAddingProduct(true);
+                                    }
+                                }}
                                 className="bg-secondary-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-secondary-700 transition-colors font-medium shadow-sm"
                             >
-                                <Plus className="w-5 h-5" /> Add New
+                                {isAddingProduct ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                                {isAddingProduct ? 'Cancel' : 'Add New'}
                             </button>
                         </div>
 
                         {isAddingProduct && (
                             <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-gray-100 mb-8 max-w-6xl mx-auto">
                                 <div className="flex justify-between items-center mb-8 border-b pb-4">
-                                    <h3 className="text-2xl font-bold text-gray-900">Add New {shop?.shopType === 'salons' ? 'Service' : 'Product'}</h3>
+                                    <h3 className="text-2xl font-bold text-gray-900">{isEditingProduct ? 'Update' : 'Add New'} {shop?.shopType === 'salons' ? 'Service' : 'Product'}</h3>
                                     <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-lg text-sm font-bold capitalize">
                                         <Tag className="w-4 h-4" /> {shop?.shopType || 'General'}
                                     </div>
@@ -667,8 +716,15 @@ export default function SellerDashboard() {
                                     </div>
 
                                     <div className="flex gap-4 justify-end mt-10 border-t pt-8">
-                                        <button type="button" onClick={() => setIsAddingProduct(false)} className="px-8 py-3.5 text-gray-500 font-bold hover:bg-gray-100 rounded-xl transition-all">Discard</button>
-                                        <button type="submit" className="bg-primary-600 text-white px-10 py-3.5 rounded-xl font-bold hover:bg-primary-700 shadow-xl shadow-primary-500/20 transition-all hover:-translate-y-1 active:scale-95">Complete & Publish</button>
+                                        <button type="button" onClick={() => {
+                                            setIsAddingProduct(false);
+                                            setIsEditingProduct(false);
+                                            setEditingProductId(null);
+                                            setNewProduct(INITIAL_PRODUCT_STATE);
+                                        }} className="px-8 py-3.5 text-gray-500 font-bold hover:bg-gray-100 rounded-xl transition-all">Discard</button>
+                                        <button type="submit" className="bg-primary-600 text-white px-10 py-3.5 rounded-xl font-bold hover:bg-primary-700 shadow-xl shadow-primary-500/20 transition-all hover:-translate-y-1 active:scale-95">
+                                            {isEditingProduct ? 'Update Changes' : 'Complete & Publish'}
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -700,7 +756,14 @@ export default function SellerDashboard() {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <button onClick={() => handleDeleteProduct(product._id)} className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold">Delete</button>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => handleEditClick(product)} className="text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors font-semibold flex items-center gap-1.5">
+                                                            <Edit className="w-4 h-4" /> Edit
+                                                        </button>
+                                                        <button onClick={() => handleDeleteProduct(product._id)} className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold flex items-center gap-1.5">
+                                                            <Trash2 className="w-4 h-4" /> Delete
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

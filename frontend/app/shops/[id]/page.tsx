@@ -3,7 +3,8 @@
 import { useEffect, useState, use } from "react";
 import api from "../../../lib/api";
 import { motion } from "framer-motion";
-import { Star, MapPin, Phone, Mail, ShoppingCart } from "lucide-react";
+import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowUpDown, ChevronDown } from "lucide-react";
+import Link from "next/link";
 import { useCartStore } from "../../../store/useCartStore";
 import toast from "react-hot-toast";
 
@@ -14,6 +15,7 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
     const [shop, setShop] = useState<any>(null);
     const [products, setProducts] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [sortBy, setSortBy] = useState<string>("default"); // default, price-asc, price-desc, name-asc, name-desc
 
     const { addToCart } = useCartStore();
 
@@ -42,7 +44,9 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
         }
     };
 
-    const handleAddToCart = async (product: any) => {
+    const handleAddToCart = async (e: React.MouseEvent, product: any) => {
+        e.preventDefault();
+        e.stopPropagation();
         const success = await addToCart(product._id, 1);
         if (success) {
             toast.success(`${product.name} added to cart!`);
@@ -50,6 +54,19 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
             toast.error("Failed to add to cart. Please log in first.");
         }
     };
+
+    const getSortedProducts = () => {
+        const sorted = [...products];
+        switch (sortBy) {
+            case "price-asc": return sorted.sort((a, b) => a.price - b.price);
+            case "price-desc": return sorted.sort((a, b) => b.price - a.price);
+            case "name-asc": return sorted.sort((a, b) => a.name.localeCompare(b.name));
+            case "name-desc": return sorted.sort((a, b) => b.name.localeCompare(a.name));
+            default: return sorted;
+        }
+    };
+
+    const sortedProducts = getSortedProducts();
 
     if (isLoading) {
         return (
@@ -117,9 +134,26 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
                 </div>
 
                 <div className="md:col-span-3">
-                    <h2 className="text-2xl font-bold font-heading mb-6 flex items-center gap-2">
-                        Available Products <span className="text-gray-400 font-normal text-lg">({products.length})</span>
-                    </h2>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <h2 className="text-2xl font-bold font-heading flex items-center gap-2">
+                            Available Products <span className="text-gray-400 font-normal text-lg">({products.length})</span>
+                        </h2>
+
+                        <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary-500 transition-all">
+                            <ArrowUpDown className="w-4 h-4 text-gray-400" />
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="bg-transparent text-sm font-bold text-gray-700 outline-none cursor-pointer pr-8 appearance-none relative z-10"
+                            >
+                                <option value="default">Sort By: Featured</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="price-desc">Price: High to Low</option>
+                                <option value="name-asc">Name: A to Z</option>
+                                <option value="name-desc">Name: Z to A</option>
+                            </select>
+                        </div>
+                    </div>
 
                     {products.length === 0 ? (
                         <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
@@ -127,58 +161,63 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                            {products.map((product: any, i) => (
-                                <motion.div
+                            {sortedProducts.map((product: any, i) => (
+                                <Link
+                                    href={`/products/${product._id}`}
                                     key={product._id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-primary-100 transition-all group flex flex-col h-full"
+                                    className="block h-full"
                                 >
-                                    <div className="h-48 bg-gray-50 relative overflow-hidden flex items-center justify-center p-4">
-                                        <img
-                                            src={product.images?.[0] || "https://via.placeholder.com/300?text=No+Image"}
-                                            alt={product.name}
-                                            className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500"
-                                        />
-                                        {product.stockQuantity < 5 && product.stockQuantity > 0 && (
-                                            <div className="absolute top-3 left-3 bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-bold">
-                                                Only {product.stockQuantity} left!
-                                            </div>
-                                        )}
-                                        {product.stockQuantity === 0 && (
-                                            <div className="absolute top-3 left-3 bg-gray-800 text-white px-2 py-1 rounded-full text-xs font-bold">
-                                                Out of Stock
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="p-5 flex flex-col flex-1 border-t border-gray-50">
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-start gap-4 mb-2">
-                                                <h4 className="font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2 leading-tight">
-                                                    {product.name}
-                                                </h4>
-                                                <span className="font-extrabold text-lg text-primary-600 shrink-0">₹{product.price}</span>
-                                            </div>
-                                            <p className="text-sm text-gray-500 line-clamp-2 mb-4">
-                                                {product.description}
-                                            </p>
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-primary-100 transition-all group flex flex-col h-full"
+                                    >
+                                        <div className="h-48 bg-gray-50 relative overflow-hidden flex items-center justify-center p-4">
+                                            <img
+                                                src={product.images?.[0] || "https://via.placeholder.com/300?text=No+Image"}
+                                                alt={product.name}
+                                                className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500"
+                                            />
+                                            {product.stockQuantity < 5 && product.stockQuantity > 0 && (
+                                                <div className="absolute top-3 left-3 bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-bold">
+                                                    Only {product.stockQuantity} left!
+                                                </div>
+                                            )}
+                                            {product.stockQuantity === 0 && (
+                                                <div className="absolute top-3 left-3 bg-gray-800 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                                    Out of Stock
+                                                </div>
+                                            )}
                                         </div>
 
-                                        <button
-                                            onClick={() => handleAddToCart(product)}
-                                            disabled={product.stockQuantity === 0}
-                                            className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${product.stockQuantity === 0
+                                        <div className="p-5 flex flex-col flex-1 border-t border-gray-50">
+                                            <div className="flex-1">
+                                                <div className="flex justify-between items-start gap-4 mb-2">
+                                                    <h4 className="font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2 leading-tight">
+                                                        {product.name}
+                                                    </h4>
+                                                    <span className="font-extrabold text-lg text-primary-600 shrink-0">₹{product.price}</span>
+                                                </div>
+                                                <p className="text-sm text-gray-500 line-clamp-2 mb-4">
+                                                    {product.description}
+                                                </p>
+                                            </div>
+
+                                            <button
+                                                onClick={(e) => handleAddToCart(e, product)}
+                                                disabled={product.stockQuantity === 0}
+                                                className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${product.stockQuantity === 0
                                                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                     : 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-md'
-                                                }`}
-                                        >
-                                            <ShoppingCart className="w-5 h-5" />
-                                            {product.stockQuantity === 0 ? "Out of Stock" : "Add to Cart"}
-                                        </button>
-                                    </div>
-                                </motion.div>
+                                                    }`}
+                                            >
+                                                <ShoppingCart className="w-5 h-5" />
+                                                {product.stockQuantity === 0 ? "Out of Stock" : "Add to Cart"}
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                </Link>
                             ))}
                         </div>
                     )}
