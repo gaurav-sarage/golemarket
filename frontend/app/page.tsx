@@ -48,7 +48,7 @@ export default function Home() {
   return (
     <div className="bg-gray-50 flex flex-col w-full h-full min-h-screen pt-16 sm:pt-20 lg:pt-24">
       {/* Hero Section */}
-      <section className="relative px-4 py-16 sm:py-24 lg:py-32 overflow-hidden bg-white w-full border-b border-gray-100 flex items-center justify-center text-center">
+      <section className="relative px-4 pt-8 pb-16 sm:pt-12 sm:pb-24 lg:pt-16 lg:pb-32 overflow-hidden bg-white w-full border-b border-gray-100 flex items-center justify-center text-center">
         <div className="absolute inset-0 z-0">
           <div className="absolute top-0 right-0 w-[400px] sm:w-[800px] h-[400px] sm:h-[800px] bg-gradient-to-br from-primary-100/40 via-secondary-50/40 to-white rounded-full blur-3xl opacity-80 translate-x-1/3 -translate-y-1/3" />
           <div className="absolute bottom-0 left-0 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-gradient-to-tr from-secondary-100/40 via-primary-50/40 to-white rounded-full blur-3xl opacity-80 -translate-x-1/3 translate-y-1/3" />
