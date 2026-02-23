@@ -148,11 +148,7 @@ export default function Login() {
                         </button>
                     </form>
 
-                    <div className="mt-10 pt-6 border-t border-gray-100 flex flex-col gap-4">
-                        <Link href="/seller/login" className="w-full h-12 flex items-center justify-center px-4 text-sm font-bold rounded-xl text-gray-600 bg-white border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-all">
-                            Are you a Shop Owner? Sign in here
-                        </Link>
-                    </div>
+
                 </div>
             </div>
         </div>
