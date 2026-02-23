@@ -23,4 +23,4 @@ const PaymentSchema: Schema = new Schema({
     metadata: { type: Schema.Types.Mixed }
 }, { timestamps: true });
 
-export const Payment = mongoose.model<IPayment>('Payment', PaymentSchema);
+export const Payment = (mongoose.models.Payment as mongoose.Model<IPayment>) || mongoose.model<IPayment>("Payment", PaymentSchema);

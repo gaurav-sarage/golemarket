@@ -14,4 +14,4 @@ const SectionSchema: Schema = new Schema({
     coverImage: { type: String }
 }, { timestamps: true });
 
-export const Section = mongoose.model<ISection>('Section', SectionSchema);
+export const Section = (mongoose.models.Section as mongoose.Model<ISection>) || mongoose.model<ISection>("Section", SectionSchema);

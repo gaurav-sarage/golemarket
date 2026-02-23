@@ -34,4 +34,4 @@ const ShopSchema: Schema = new Schema({
     rating: { type: Number, default: 0 }
 }, { timestamps: true });
 
-export const Shop = mongoose.model<IShop>('Shop', ShopSchema);
+export const Shop = (mongoose.models.Shop as mongoose.Model<IShop>) || mongoose.model<IShop>("Shop", ShopSchema);

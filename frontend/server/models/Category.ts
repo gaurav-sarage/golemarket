@@ -12,4 +12,4 @@ const CategorySchema: Schema = new Schema({
     description: { type: String }
 }, { timestamps: true });
 
-export const Category = mongoose.model<ICategory>('Category', CategorySchema);
+export const Category = (mongoose.models.Category as mongoose.Model<ICategory>) || mongoose.model<ICategory>("Category", CategorySchema);

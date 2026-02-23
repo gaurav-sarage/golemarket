@@ -23,4 +23,4 @@ const InventoryLogSchema: Schema = new Schema({
     referenceId: { type: Schema.Types.ObjectId }
 }, { timestamps: true });
 
-export const InventoryLog = mongoose.model<IInventoryLog>('InventoryLog', InventoryLogSchema);
+export const InventoryLog = (mongoose.models.InventoryLog as mongoose.Model<IInventoryLog>) || mongoose.model<IInventoryLog>("InventoryLog", InventoryLogSchema);

@@ -13,8 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         await connectDB();
         // Disabling body parsing allows Express specifically to naturally stream and intercept multi-part payloads exactly as originally implemented.
         app(req, res);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Critical failure during App Handler invocation:", error);
-        res.status(500).json({ success: false, message: "Internal Server API Error" });
+        res.status(500).json({ success: false, message: "Internal Server API Error: " + error.message });
     }
 }

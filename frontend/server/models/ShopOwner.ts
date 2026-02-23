@@ -28,4 +28,4 @@ const ShopOwnerSchema: Schema = new Schema({
     resetPasswordExpire: { type: Date },
 }, { timestamps: true });
 
-export const ShopOwner = mongoose.model<IShopOwner>('ShopOwner', ShopOwnerSchema);
+export const ShopOwner = (mongoose.models.ShopOwner as mongoose.Model<IShopOwner>) || mongoose.model<IShopOwner>("ShopOwner", ShopOwnerSchema);

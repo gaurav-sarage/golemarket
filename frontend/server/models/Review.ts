@@ -19,4 +19,4 @@ const ReviewSchema: Schema = new Schema({
     comment: { type: String }
 }, { timestamps: true });
 
-export const Review = mongoose.model<IReview>('Review', ReviewSchema);
+export const Review = (mongoose.models.Review as mongoose.Model<IReview>) || mongoose.model<IReview>("Review", ReviewSchema);

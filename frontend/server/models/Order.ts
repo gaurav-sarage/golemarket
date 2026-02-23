@@ -35,7 +35,7 @@ const ShopOrderSchema: Schema = new Schema({
     }
 }, { timestamps: true });
 
-export const ShopOrder = mongoose.model<IShopOrder>('ShopOrder', ShopOrderSchema);
+export const ShopOrder = (mongoose.models.ShopOrder as mongoose.Model<IShopOrder>) || mongoose.model<IShopOrder>("ShopOrder", ShopOrderSchema);
 
 export interface IOrder extends Document {
     userId: mongoose.Types.ObjectId;
@@ -67,4 +67,4 @@ const OrderSchema: Schema = new Schema({
     }
 }, { timestamps: true });
 
-export const Order = mongoose.model<IOrder>('Order', OrderSchema);
+export const Order = (mongoose.models.Order as mongoose.Model<IOrder>) || mongoose.model<IOrder>("Order", OrderSchema);
