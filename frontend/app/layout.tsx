@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
@@ -15,8 +16,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Gole Market Hub",
-  description: "The digital storefront for Gole Market - Your unified marketplace.",
+  title: "GoleCentral",
+  description: "The digital storefront for GoleCentral - Your unified marketplace.",
 };
 
 export default function RootLayout({
@@ -26,11 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-gray-50 text-gray-900`}>
+      <body className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-gray-50 text-gray-900 flex flex-col min-h-screen`}>
         <Navbar />
-        <main className="min-h-screen pt-16">
+        <main className="flex-grow pt-16">
           {children}
         </main>
+        <Footer />
         <Toaster position="bottom-right" />
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ShoppingBag, Utensils, Zap, Laptop, Scissors } from "lucide-react";
+import { ArrowRight, ShoppingBag, Utensils, Zap, Laptop, Scissors, Store } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -12,49 +12,93 @@ const SECTIONS = [
   { id: "services", name: "Services", icon: Scissors, color: "bg-purple-100 text-purple-600" }
 ];
 
-const MOCK_SHOPS = [
-  { id: "1", name: "Sharma Sweets", type: "food", rating: 4.8, image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1" },
-  { id: "2", name: "Tech Guru", type: "electronics", rating: 4.5, image: "https://images.unsplash.com/photo-1550005972-eaffddbeaaab" },
-  { id: "3", name: "Riya Boutique", type: "fashion", rating: 4.9, image: "https://images.unsplash.com/photo-1565084888279-aca607ecce0c" },
-  { id: "4", name: "Gole Pharmacy", type: "services", rating: 4.7, image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88" },
-];
-
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="bg-gray-50 flex flex-col w-full h-full">
       {/* Hero Section */}
-      <section className="relative px-4 py-20 lg:py-32 overflow-hidden bg-white">
+      <section className="relative px-4 py-20 lg:py-32 overflow-hidden bg-white w-full border-b border-gray-100">
         <div className="absolute inset-0 z-0">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-100 rounded-full blur-3xl opacity-50" />
-          <div className="absolute bottom-10 -left-10 w-72 h-72 bg-secondary-50 rounded-full blur-3xl opacity-60" />
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-primary-100/40 via-secondary-50/40 to-white rounded-full blur-3xl opacity-80 translate-x-1/3 -translate-y-1/3" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-secondary-100/40 via-primary-50/40 to-white rounded-full blur-3xl opacity-80 -translate-x-1/3 translate-y-1/3" />
         </div>
 
-        <div className="max-w-7xl mx-auto relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-5xl md:text-7xl font-heading font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
-              The Heart of <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500">Gole Market</span><br /> Now Online.
-            </h1>
-            <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-600 mb-10">
-              Shop from over 20+ authentic local stores, across 4 vibrant sections. Everything you love about Gole Market, delivered to your door.
-            </p>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center lg:text-left"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 text-primary-700 font-medium text-sm mb-6 border border-primary-100 shadow-sm">
+                <Store className="w-4 h-4" />
+                <span>The Future of Local Commerce</span>
+              </div>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="#explore" className="px-8 py-4 rounded-full bg-primary-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary-700 hover:shadow-lg hover:-translate-y-1 transition-all">
-                Explore Shops <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-          </motion.div>
+              <h1 className="text-5xl md:text-7xl font-heading font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
+                Welcome to <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500">GoleCentral</span>
+              </h1>
+
+              <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-xl mx-auto lg:mx-0">
+                Experience the magic of your community marketplace, completely reimagined. Shop thousands of unique products from verified local sellers, anywhere, anytime.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Link href="/shops" className="px-8 py-4 rounded-2xl bg-gray-900 text-white font-bold flex items-center justify-center gap-2 hover:bg-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 text-lg">
+                  Explore Shops Now <ArrowRight className="w-5 h-5" />
+                </Link>
+                <Link href="/seller/register" className="px-8 py-4 rounded-2xl bg-white text-gray-900 font-bold border-2 border-gray-100 hover:border-gray-200 hover:shadow-md transition-all active:scale-95 text-lg flex items-center justify-center gap-2">
+                  Open Your Shop in Minutes
+                </Link>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative hidden lg:block"
+            >
+              <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[8px] border-white bg-white">
+                <img
+                  src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1"
+                  alt="Marketplace Platform"
+                  className="w-full h-[600px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent flex items-end p-8">
+                  <div className="text-white">
+                    <h3 className="text-2xl font-bold mb-2">Authentic Goodness</h3>
+                    <p className="text-gray-100/90 font-medium text-lg">Discover the best local vendors.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Element */}
+              <div className="absolute top-10 -left-12 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-bounce hover:scale-105 transition-transform cursor-pointer border border-gray-100">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                  <ShoppingBag className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Recent Order</p>
+                  <p className="font-bold text-gray-900">Delivered securely!</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Sections */}
-      <section id="explore" className="py-20 px-4 max-w-7xl mx-auto w-full">
-        <h2 className="text-3xl font-heading font-bold mb-10 text-center">Browse by Section</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {/* Categories Section */}
+      <section id="explore" className="py-24 px-4 max-w-7xl mx-auto w-full">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-4xl md:text-5xl font-heading font-extrabold mb-6 text-gray-900">Explore Categories</h2>
+          <p className="text-xl text-gray-600">
+            Dive into our curated marketplace hubs. Find exactly what you need, exactly when you need it.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {SECTIONS.map((sec, i) => {
             const Icon = sec.icon;
             return (
@@ -62,76 +106,45 @@ export default function Home() {
                 key={sec.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group p-6 rounded-3xl bg-white shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary-100 transition-all cursor-pointer text-center"
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="group relative p-8 rounded-[2rem] bg-white shadow-sm border border-gray-100 hover:shadow-2xl hover:border-primary-100 transition-all duration-300 cursor-pointer text-center overflow-hidden"
               >
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${sec.color} group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-8 h-8" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                <div className={`relative z-10 w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center ${sec.color} group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-sm`}>
+                  <Icon className="w-10 h-10" />
                 </div>
-                <h3 className="font-bold text-gray-900">{sec.name}</h3>
+
+                <h3 className="relative z-10 text-xl font-bold text-gray-900 mb-2">{sec.name}</h3>
+                <p className="relative z-10 text-gray-500 text-sm font-medium">View Collections &rarr;</p>
               </motion.div>
             )
           })}
         </div>
       </section>
 
-      {/* Popular Shops */}
-      <section className="py-20 px-4 max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-end mb-10">
-          <div>
-            <h2 className="text-3xl font-heading font-bold">Popular Shops</h2>
-            <p className="text-gray-500 mt-2">Discover the top-rated local favorites</p>
-          </div>
-          <Link href="/shops" className="text-primary-600 font-semibold hover:underline flex items-center gap-1">
-            View All <ArrowRight className="w-4 h-4" />
-          </Link>
+      {/* CTA Section */}
+      <section className="bg-gray-900 py-24 px-4 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute -top-40 right-1/4 w-96 h-96 bg-primary-600 rounded-full blur-[100px] opacity-20" />
+          <div className="absolute bottom-0 left-10 w-72 h-72 bg-secondary-500 rounded-full blur-[100px] opacity-20" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {MOCK_SHOPS.map((shop, i) => (
-            <motion.div
-              key={shop.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-gray-100 group cursor-pointer flex flex-col h-full"
-            >
-              <div className="h-48 overflow-hidden relative">
-                <img src={shop.image} alt={shop.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                  ⭐ {shop.rating}
-                </div>
-              </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-primary-600 transition-colors">
-                    {shop.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 capitalize mt-1">
-                    {shop.type}
-                  </p>
-                </div>
-                <Link href={`/shops/${shop.id}`} className="mt-4 w-full py-2 rounded-lg bg-gray-50 text-center font-medium hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                  Visit Store
-                </Link>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Footer CTA */}
-      <section className="bg-primary-600 py-20 px-4 mt-auto">
-        <div className="max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-3xl md:text-5xl font-heading font-bold mb-6">Are you a Shop Owner?</h2>
-          <p className="text-primary-100 mb-8 max-w-2xl mx-auto text-lg">
-            Join Gole Market Hub and take your local business online. Manage inventory, receive orders, and grow your customer base with our unified platform.
+        <div className="max-w-4xl mx-auto text-center text-white relative z-10">
+          <h2 className="text-4xl md:text-6xl font-heading font-extrabold mb-8 leading-tight">Join the GoleCentral Ecosystem</h2>
+          <p className="text-gray-400 mb-12 max-w-2xl mx-auto text-xl leading-relaxed">
+            Whether you are looking to shop locally with zero hassle, or looking to scale your local brick-and-mortar digitally, we have crafted the perfect platform for you.
           </p>
-          <Link href="/seller/register" className="inline-block px-8 py-4 rounded-full bg-white text-primary-600 font-bold hover:shadow-lg hover:scale-105 transition-all">
-            Join as Seller
-          </Link>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-6">
+            <Link href="/register" className="px-8 py-4 rounded-2xl bg-primary-600 text-white font-bold hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/20 active:scale-95 transition-all text-lg">
+              Sign Up as Customer
+            </Link>
+            <Link href="/seller/register" className="px-8 py-4 rounded-2xl bg-white/10 text-white font-bold border border-white/20 hover:bg-white/20 hover:border-white/30 backdrop-blur-sm active:scale-95 transition-all text-lg flex items-center justify-center gap-2">
+              <Store className="w-5 h-5" /> Start Selling
+            </Link>
+          </div>
         </div>
       </section>
     </div>
