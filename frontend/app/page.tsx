@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ShoppingBag, Utensils, Zap, Laptop, Scissors, Store, Coffee, Car, ShieldCheck, Clock, CheckCircle } from "lucide-react";
+import { ArrowRight, ShoppingBag, Utensils, Zap, Laptop, Scissors, Store, Coffee, Car, ShieldCheck, Clock, CheckCircle, ShoppingCart } from "lucide-react";
 import Link from "next/link";
-import React, from "react";
+import React from "react";
 
 const CATEGORIES = [
   { id: "restaurants", name: "Restaurants", icon: Utensils, color: "bg-red-100 text-red-600" },

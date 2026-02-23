@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Store, ShoppingCart, Search, User, LogOut, Package, Menu, X } from "lucide-react";
+import { Store, ShoppingCart, Search, User, LogOut, Package, Menu, X, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import CartDrawer from "./CartDrawer";
 import { useAuthStore } from "../store/useAuthStore";
