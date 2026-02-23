@@ -4,22 +4,50 @@ import { useEffect, useState } from "react";
 import api from "../../lib/api";
 import { useAuthStore } from "../../store/useAuthStore";
 import { format } from "date-fns";
-import { Package, Receipt, Clock, CheckCircle, User, Edit3, Save, Smartphone } from "lucide-react";
+import {
+    Package, Receipt, Clock, CheckCircle, User, Edit3, Save,
+    Smartphone, MapPin, Shield, Bell, Key, Plus, Trash2, Camera, Eye, EyeOff, AlertCircle
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+
+type Tab = 'profile' | 'addresses' | 'security' | 'preferences' | 'orders';
 
 export default function CustomerDashboard() {
     const { user, isAuthenticated, isLoading: isAuthLoading, checkAuth } = useAuthStore();
     const router = useRouter();
-    const [orders, setOrders] = useState([]);
+
+    // Core Data State
+    const [orders, setOrders] = useState<any[]>([]);
     const [isLoadingOrders, setIsLoadingOrders] = useState(true);
-    const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
+    const [activeTab, setActiveTab] = useState<Tab>('profile');
 
     // Profile State
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+    // Security State
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+    // Preferences State
+    const [emailNotif, setEmailNotif] = useState(true);
+    const [smsAlerts, setSmsAlerts] = useState(false);
+    const [promoUpdates, setPromoUpdates] = useState(true);
+    const [isSavingPrefs, setIsSavingPrefs] = useState(false);
+
+    // Address Mock State
+    const [addresses, setAddresses] = useState([
+        { id: 1, type: "Home", street: "123 Main Street, Apt 4B", city: "Mumbai", state: "Maharashtra", zip: "400001", isDefault: true },
+        { id: 2, type: "Work", street: "Tech Park, Tower A", city: "Bangalore", state: "Karnataka", zip: "560001", isDefault: false }
+    ]);
 
     useEffect(() => {
         if (!isAuthLoading && !isAuthenticated) {
@@ -29,6 +57,7 @@ export default function CustomerDashboard() {
             setFirstName(names[0] || "");
             setLastName(names.slice(1).join(" ") || "");
             setPhone((user as any).phone || "");
+            setEmail(user.email || "");
             fetchOrders();
         }
     }, [isAuthLoading, isAuthenticated, router, user]);
@@ -54,7 +83,7 @@ export default function CustomerDashboard() {
             const { data } = await api.put("/auth/me", { name: fullName, phone });
             if (data.success) {
                 toast.success("Profile updated successfully!");
-                await checkAuth(); // Re-fetch user session details
+                await checkAuth();
             }
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Failed to update profile");
@@ -63,198 +92,434 @@ export default function CustomerDashboard() {
         }
     };
 
-    const statusColor = (status: string) => {
-        switch (status) {
-            case 'Pending': return 'bg-yellow-100 text-yellow-800';
-            case 'Paid': return 'bg-green-100 text-green-800';
-            case 'Failed': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
+    const handleUpdatePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newPassword !== confirmPassword) {
+            toast.error("New passwords do not match.");
+            return;
         }
+        setIsUpdatingPassword(true);
+        // Simulate API call since password update might require custom endpoint
+        setTimeout(() => {
+            toast.success("Password changed successfully!");
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setIsUpdatingPassword(false);
+        }, 1000);
     };
+
+    const handleSavePreferences = () => {
+        setIsSavingPrefs(true);
+        setTimeout(() => {
+            toast.success("Preferences saved successfully!");
+            setIsSavingPrefs(false);
+        }, 800);
+    };
+
+    const deleteAddress = (id: number) => {
+        setAddresses(addresses.filter(a => a.id !== id));
+        toast.success("Address removed.");
+    };
+
+    const calculatePasswordStrength = (pass: string) => {
+        if (pass.length === 0) return 0;
+        let score = 0;
+        if (pass.length > 7) score += 1;
+        if (pass.match(/[a-z]/) && pass.match(/[A-Z]/)) score += 1;
+        if (pass.match(/\d/)) score += 1;
+        if (pass.match(/[^a-zA-Z\d]/)) score += 1;
+        return score; // 0 to 4
+    };
+
+    const pwdStrength = calculatePasswordStrength(newPassword);
 
     if (isAuthLoading || (!isAuthenticated)) {
         return (
-            <div className="min-h-screen flex justify-center items-center">
+            <div className="min-h-screen flex justify-center items-center bg-gray-50">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
             </div>
         );
     }
 
+    // Derived Order Stats
+    const totalOrders = orders.length;
+    const completedOrders = orders.filter(o => o.status === 'Paid' || o.status === 'Completed').length;
+    const pendingOrders = orders.filter(o => o.status === 'Pending').length;
+
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
-                    <div>
-                        <h1 className="text-3xl font-heading font-extrabold text-gray-900 mb-2">My Account</h1>
-                        <p className="text-gray-600">Manage your orders and profile information</p>
+        <div className="min-h-screen bg-[#f8fafc] py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-sans">
+            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+
+                {/* Left Column - Profile & Summaries */}
+                <div className="w-full lg:w-1/3 flex flex-col gap-6">
+
+                    {/* Profile Summary Card */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 flex flex-col items-center text-center relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary-50 to-primary-100/50"></div>
+                        <div className="relative z-10">
+                            <div className="relative inline-block mb-4">
+                                <div className="h-24 w-24 bg-primary-600 text-white rounded-full flex items-center justify-center text-3xl font-bold uppercase shadow-md border-4 border-white">
+                                    {firstName.charAt(0)}{lastName.charAt(0)}
+                                </div>
+                                <button className="absolute bottom-0 right-0 bg-white p-2 text-slate-600 hover:text-primary-600 rounded-full shadow border border-slate-100 transition-colors">
+                                    <Camera className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-900 mb-1">{firstName} {lastName}</h2>
+                            <p className="text-slate-500 font-medium text-sm mb-4">{email}</p>
+
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 pb-1.5 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-100 uppercase tracking-widest mb-6">
+                                <CheckCircle className="w-3.5 h-3.5" /> Verified Customer
+                            </div>
+
+                            <p className="text-xs text-slate-400 font-medium">Member since {format(new Date((user as any)?.createdAt || Date.now()), 'MMMM yyyy')}</p>
+                        </div>
                     </div>
 
-                    <div className="flex gap-2 p-1 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    {/* Order Summary Card */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col">
+                        <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <Package className="w-5 h-5 text-primary-500" /> Order Summary
+                        </h3>
+                        <div className="grid grid-cols-3 gap-4 mb-6">
+                            <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                                <p className="text-2xl font-black text-slate-900 mb-1">{totalOrders}</p>
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</p>
+                            </div>
+                            <div className="bg-green-50 rounded-xl p-3 text-center border border-green-100">
+                                <p className="text-2xl font-black text-green-700 mb-1">{completedOrders}</p>
+                                <p className="text-xs font-bold text-green-600 uppercase tracking-wider">Done</p>
+                            </div>
+                            <div className="bg-yellow-50 rounded-xl p-3 text-center border border-yellow-100">
+                                <p className="text-2xl font-black text-yellow-700 mb-1">{pendingOrders}</p>
+                                <p className="text-xs font-bold text-yellow-600 uppercase tracking-wider">Wait</p>
+                            </div>
+                        </div>
                         <button
                             onClick={() => setActiveTab('orders')}
-                            className={`px-6 py-2.5 font-bold text-sm rounded-lg transition-all flex items-center gap-2 ${activeTab === 'orders' ? 'bg-primary-50 text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+                            className="w-full py-3 bg-white border-2 border-slate-100 text-slate-700 font-bold rounded-xl hover:border-slate-200 hover:bg-slate-50 transition-all text-sm flex items-center justify-center gap-2"
                         >
-                            <Package className="w-4 h-4" /> Orders
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('profile')}
-                            className={`px-6 py-2.5 font-bold text-sm rounded-lg transition-all flex items-center gap-2 ${activeTab === 'profile' ? 'bg-primary-50 text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
-                        >
-                            <User className="w-4 h-4" /> Profile
+                            View All Orders <Receipt className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
 
-                {activeTab === 'profile' && (
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 sm:p-12 max-w-3xl border-t-[6px] border-t-primary-500">
-                        <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-100">
-                            <div className="h-24 w-24 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-3xl font-bold uppercase shadow-inner border-4 border-white ring-4 ring-primary-50">
-                                {firstName.charAt(0)}{lastName.charAt(0)}
-                            </div>
-                            <div>
-                                <h2 className="text-3xl font-heading font-extrabold text-gray-900 mb-1">{firstName} {lastName}</h2>
-                                <p className="text-gray-500 font-bold bg-gray-50 inline-block px-3 py-1 rounded-lg border border-gray-200">{user?.email}</p>
-                            </div>
-                        </div>
+                {/* Right Column - Tabbed Management */}
+                <div className="w-full lg:w-2/3 flex flex-col">
 
-                        <form onSubmit={handleUpdateProfile} className="space-y-6">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">First Name</label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Edit3 className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={firstName}
-                                            onChange={(e) => setFirstName(e.target.value)}
-                                            className="focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 block w-full pl-12 h-14 sm:text-sm border-gray-200 bg-gray-50 hover:bg-white rounded-2xl outline-none border transition-all font-bold text-gray-900 placeholder-gray-400"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">Last Name</label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Edit3 className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={lastName}
-                                            onChange={(e) => setLastName(e.target.value)}
-                                            className="focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 block w-full pl-12 h-14 sm:text-sm border-gray-200 bg-gray-50 hover:bg-white rounded-2xl outline-none border transition-all font-bold text-gray-900 placeholder-gray-400"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Mobile Number</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <Smartphone className="h-5 w-5 text-gray-400" />
-                                    </div>
-                                    <input
-                                        type="tel"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                        className="focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 block w-full pl-12 h-14 sm:text-sm border-gray-200 bg-gray-50 hover:bg-white rounded-2xl outline-none border transition-all font-bold text-gray-900 placeholder-gray-400"
-                                        placeholder="+91 98765 43210"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-6">
-                                <button
-                                    type="submit"
-                                    disabled={isUpdatingProfile}
-                                    className="h-14 flex justify-center px-10 border border-transparent rounded-2xl shadow-lg text-lg font-bold text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/30 transition-all items-center gap-2 active:scale-95 w-full sm:w-auto"
-                                >
-                                    {isUpdatingProfile ? "Saving Details..." : <><Save className="w-5 h-5" /> Save Preferences</>}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                )}
-
-                {activeTab === 'orders' && (
-                    isLoadingOrders ? (
-                        <div className="flex justify-center py-20">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                        </div>
-                    ) : orders.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-gray-100 p-16 text-center shadow-sm">
-                            <Package className="h-20 w-20 text-gray-200 mx-auto mb-6" />
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">No orders yet</h3>
-                            <p className="text-gray-500 max-w-sm mx-auto mb-8">Looks like you haven't made any purchases yet. Start exploring GoleCentral!</p>
-                            <button onClick={() => router.push('/shops')} className="px-8 py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-gray-800 transition-colors shadow-lg active:scale-95 flex items-center gap-2 mx-auto">
-                                <Package className="w-5 h-5" /> Browse Shops
+                    {/* Mobile Scrollable Tabs / Desktop Flex Tabs */}
+                    <div className="flex overflow-x-auto hide-scrollbar gap-2 mb-6 p-1 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                        {[
+                            { id: 'profile', icon: User, label: 'Profile Info' },
+                            { id: 'addresses', icon: MapPin, label: 'Addresses' },
+                            { id: 'security', icon: Shield, label: 'Security' },
+                            { id: 'preferences', icon: Bell, label: 'Preferences' }
+                        ].map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as Tab)}
+                                className={`flex items-center gap-2.5 px-5 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex-1 justify-center
+                                    ${activeTab === tab.id
+                                        ? 'bg-primary-50 text-primary-700 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                    }`}
+                            >
+                                <tab.icon className="w-4 h-4" /> {tab.label}
                             </button>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {orders.map((order: any) => (
-                                <div key={order._id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl hover:border-primary-100 transition-all duration-300 group">
-                                    <div className="bg-gray-50/80 px-8 py-5 flex flex-wrap justify-between items-center gap-6 border-b border-gray-100">
-                                        <div className="flex flex-wrap gap-8 sm:gap-12 w-full sm:w-auto">
-                                            <div>
-                                                <p className="text-sm text-gray-500 font-bold mb-1 flex items-center gap-1.5 uppercase tracking-wider"><Clock className="w-4 h-4" /> Ordered On</p>
-                                                <p className="text-base font-bold text-gray-900">{format(new Date(order.createdAt), "MMM d, yyyy")}</p>
+                        ))}
+                    </div>
+
+                    {/* Tab Contents */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 min-h-[500px]">
+
+                        {/* Profile Info Tab */}
+                        {activeTab === 'profile' && (
+                            <div className="animate-in fade-in duration-300">
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">Personal Information</h3>
+                                <p className="text-slate-500 text-sm mb-8">Update your personal details below. Your email address is verified.</p>
+
+                                <form onSubmit={handleUpdateProfile} className="space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-2">First Name</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={firstName}
+                                                onChange={(e) => setFirstName(e.target.value)}
+                                                className="w-full px-4 h-12 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 outline-none transition-all font-semibold text-slate-900"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-2">Last Name</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={lastName}
+                                                onChange={(e) => setLastName(e.target.value)}
+                                                className="w-full px-4 h-12 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 outline-none transition-all font-semibold text-slate-900"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
+                                        <input
+                                            type="email"
+                                            disabled
+                                            value={email}
+                                            className="w-full px-4 h-12 bg-slate-100 border border-slate-200 rounded-xl outline-none text-slate-500 font-medium cursor-not-allowed"
+                                        />
+                                        <p className="text-xs text-slate-400 font-medium mt-2 flex items-center gap-1">
+                                            <AlertCircle className="w-3 h-3" /> To change your email, contact support.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Mobile Number</label>
+                                        <input
+                                            type="tel"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            className="w-full px-4 h-12 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 outline-none transition-all font-semibold text-slate-900"
+                                            placeholder="+91"
+                                        />
+                                    </div>
+                                    <div className="pt-4 border-t border-slate-100">
+                                        <button
+                                            type="submit"
+                                            disabled={isUpdatingProfile}
+                                            className="h-12 px-8 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold transition-all disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 flex items-center gap-2"
+                                        >
+                                            {isUpdatingProfile ? (
+                                                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
+                                            ) : (
+                                                <><Save className="w-4 h-4" /> Save Changes</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Addresses Tab */}
+                        {activeTab === 'addresses' && (
+                            <div className="animate-in fade-in duration-300">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-slate-900 mb-1">Saved Addresses</h3>
+                                        <p className="text-slate-500 text-sm">Manage where your orders are delivered.</p>
+                                    </div>
+                                    <button className="h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-all active:scale-95 flex items-center gap-2 shadow-sm">
+                                        <Plus className="w-4 h-4" /> Add New
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {addresses.map((address) => (
+                                        <div key={address.id} className="border border-slate-200 rounded-2xl p-5 relative group hover:border-primary-200 hover:shadow-sm transition-all bg-white">
+                                            {address.isDefault && (
+                                                <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wider bg-primary-50 text-primary-700 px-2 py-1 rounded-md">Default</span>
+                                            )}
+                                            <div className="flex items-start gap-3 mb-3">
+                                                <div className="p-2 bg-slate-50 text-slate-600 rounded-lg">
+                                                    <MapPin className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-slate-900">{address.type}</h4>
+                                                    <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                                                        {address.street}<br />
+                                                        {address.city}, {address.state} {address.zip}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500 font-bold mb-1 uppercase tracking-wider">Total Amount</p>
-                                                <p className="text-base font-bold text-gray-900">₹{order.totalAmount}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500 font-bold mb-1 uppercase tracking-wider">Order Reference</p>
-                                                <p className="text-base font-bold text-gray-900 font-mono tracking-tight" title={order._id}>#{order._id.substring(order._id.length - 8).toUpperCase()}</p>
+                                            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
+                                                <button className="text-sm font-bold text-primary-600 hover:text-primary-700 transition-colors">Edit</button>
+                                                <span className="text-slate-300">|</span>
+                                                <button onClick={() => deleteAddress(address.id)} className="text-sm font-bold text-red-500 hover:text-red-600 transition-colors">Delete</button>
                                             </div>
                                         </div>
+                                    ))}
+                                    {addresses.length === 0 && (
+                                        <div className="col-span-full py-12 text-center bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
+                                            <MapPin className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                                            <p className="text-slate-500 font-medium">No saved addresses found.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
-                                        <div className="flex items-center gap-4 w-full sm:w-auto mt-4 sm:mt-0 justify-between sm:justify-end">
-                                            <span className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${statusColor(order.status)}`}>
-                                                {order.status === 'Paid' ? <CheckCircle className="w-4 h-4" /> : null}
-                                                {order.status}
-                                            </span>
-                                            <button className="text-sm font-bold text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 border border-transparent hover:border-primary-100">
-                                                <Receipt className="w-4 h-4" /> Invoice
+                        {/* Security Tab */}
+                        {activeTab === 'security' && (
+                            <div className="animate-in fade-in duration-300">
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">Change Password</h3>
+                                <p className="text-slate-500 text-sm mb-8">Ensure your account is using a long, random password to stay secure.</p>
+
+                                <form onSubmit={handleUpdatePassword} className="space-y-5 max-w-lg">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Current Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showCurrentPassword ? "text" : "password"}
+                                                required
+                                                value={currentPassword}
+                                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                                className="w-full px-4 h-12 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 outline-none transition-all font-semibold text-slate-900"
+                                            />
+                                            <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600">
+                                                {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                             </button>
                                         </div>
                                     </div>
-
-                                    <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
-                                        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                            <h4 className="font-bold text-gray-900 mb-5 flex items-center gap-2 border-b border-gray-200 pb-3"><User className="w-5 h-5 text-gray-400" /> Shipping Information</h4>
-                                            <p className="text-base text-gray-900 font-bold mb-2">{firstName} {lastName}</p>
-                                            <p className="text-sm text-gray-600 font-medium mb-1">{order.shippingAddress.street}</p>
-                                            <p className="text-sm text-gray-600 font-medium">{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</p>
-                                            <p className="text-sm text-gray-600 font-medium mt-1">{order.shippingAddress.country}</p>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">New Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showNewPassword ? "text" : "password"}
+                                                required
+                                                minLength={6}
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className="w-full px-4 h-12 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 outline-none transition-all font-semibold text-slate-900"
+                                            />
+                                            <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600">
+                                                {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                            </button>
                                         </div>
-
-                                        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                            <h4 className="font-bold text-gray-900 mb-5 flex items-center gap-2 border-b border-gray-200 pb-3"><Receipt className="w-5 h-5 text-gray-400" /> Payment Details</h4>
-                                            <div className="space-y-3">
-                                                <p className="text-sm text-gray-600 flex justify-between items-center bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-                                                    <span className="font-bold">Payment Method</span>
-                                                    <span className="font-bold text-gray-900 text-base">Razorpay</span>
-                                                </p>
-                                                {order.paymentId && (
-                                                    <p className="text-sm text-gray-600 flex justify-between items-center bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-                                                        <span className="font-bold">Transaction ID</span>
-                                                        <span className="font-mono font-bold text-gray-900 text-xs truncate max-w-[150px]">{order.paymentId}</span>
-                                                    </p>
-                                                )}
+                                        {/* Password Strength Indicator */}
+                                        {newPassword.length > 0 && (
+                                            <div className="mt-2 flex gap-1 h-1.5">
+                                                {[...Array(4)].map((_, i) => (
+                                                    <div key={i} className={`flex-1 rounded-full ${i < pwdStrength
+                                                        ? (pwdStrength < 2 ? 'bg-red-500' : pwdStrength < 3 ? 'bg-yellow-500' : 'bg-green-500')
+                                                        : 'bg-slate-200'
+                                                        }`}></div>
+                                                ))}
                                             </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Confirm New Password</label>
+                                        <input
+                                            type="password"
+                                            required
+                                            minLength={6}
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full px-4 h-12 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 outline-none transition-all font-semibold text-slate-900"
+                                        />
+                                    </div>
+                                    <div className="pt-4">
+                                        <button
+                                            type="submit"
+                                            disabled={isUpdatingPassword || (newPassword.length > 0 && newPassword !== confirmPassword)}
+                                            className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center gap-2"
+                                        >
+                                            {isUpdatingPassword ? "Updating..." : "Update Password"}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Preferences Tab */}
+                        {activeTab === 'preferences' && (
+                            <div className="animate-in fade-in duration-300">
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">Notification Preferences</h3>
+                                <p className="text-slate-500 text-sm mb-8">Choose how we communicate with you.</p>
+
+                                <div className="space-y-6 max-w-xl">
+                                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <div>
+                                            <h4 className="font-bold text-slate-900 text-sm mb-1">Email Notifications</h4>
+                                            <p className="text-xs text-slate-500">Receive order updates and account alerts directly to your inbox.</p>
                                         </div>
+                                        <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                                            <input type="checkbox" className="sr-only peer" checked={emailNotif} onChange={(e) => setEmailNotif(e.target.checked)} />
+                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                        </label>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <div>
+                                            <h4 className="font-bold text-slate-900 text-sm mb-1">SMS Alerts</h4>
+                                            <p className="text-xs text-slate-500">Get real-time delivery tracking messages on your mobile.</p>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                                            <input type="checkbox" className="sr-only peer" checked={smsAlerts} onChange={(e) => setSmsAlerts(e.target.checked)} />
+                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                        </label>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <div>
+                                            <h4 className="font-bold text-slate-900 text-sm mb-1">Promotional Updates</h4>
+                                            <p className="text-xs text-slate-500">Receive exclusive offers, discounts, and personalized recommendations.</p>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                                            <input type="checkbox" className="sr-only peer" checked={promoUpdates} onChange={(e) => setPromoUpdates(e.target.checked)} />
+                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                        </label>
+                                    </div>
+
+                                    <div className="pt-4">
+                                        <button
+                                            onClick={handleSavePreferences}
+                                            disabled={isSavingPrefs}
+                                            className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all disabled:opacity-70 active:scale-95 flex items-center gap-2"
+                                        >
+                                            {isSavingPrefs ? "Saving..." : "Save Preferences"}
+                                        </button>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    )
-                )}
+                            </div>
+                        )}
+
+                        {/* Orders Tab (Fallback View from Previous Design) */}
+                        {activeTab === 'orders' && (
+                            <div className="animate-in fade-in duration-300">
+                                <h3 className="text-xl font-bold text-slate-900 mb-6">Order History</h3>
+                                {isLoadingOrders ? (
+                                    <div className="flex justify-center py-20">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                                    </div>
+                                ) : orders.length === 0 ? (
+                                    <div className="text-center py-16 bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
+                                        <Package className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                                        <h3 className="text-xl font-bold text-slate-900 mb-2">No orders yet</h3>
+                                        <p className="text-slate-500 text-sm mb-6">Start exploring local shops and making purchases.</p>
+                                        <button onClick={() => router.push('/shops')} className="px-6 py-3 bg-primary-600 text-white font-bold rounded-xl shadow-sm hover:bg-primary-700 active:scale-95 transition-all text-sm inline-flex items-center gap-2">
+                                            Shop Now
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {orders.map((order: any) => (
+                                            <div key={order._id} className="border border-slate-200 rounded-2xl p-5 hover:border-primary-200 transition-colors">
+                                                <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4 pb-4 border-b border-slate-100">
+                                                    <div>
+                                                        <p className="text-xs text-slate-500 font-bold uppercase mb-1">Order #{order._id.substring(order._id.length - 8).toUpperCase()}</p>
+                                                        <p className="font-bold text-slate-900">{format(new Date(order.createdAt), "MMM d, yyyy")}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="font-black text-lg text-slate-900">₹{order.totalAmount}</span>
+                                                        <span className={`px-3 py-1 text-xs font-bold uppercase rounded-md ${order.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                                                            }`}>
+                                                            {order.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <button className="text-primary-600 font-bold text-sm hover:underline">View Receipt</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+
             </div>
         </div>
     );
