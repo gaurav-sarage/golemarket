@@ -50,16 +50,20 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     });
 });
 
-let isConnected = false;
 export const connectDB = async () => {
-    if (isConnected) return;
     if (mongoose.connection.readyState >= 1) {
-        isConnected = true;
         return;
     }
-    await mongoose.connect(process.env.MONGO_URI!);
-    isConnected = true;
-    console.log('MongoDB connected natively within Next.js API instance');
+
+    try {
+        await mongoose.connect(process.env.MONGO_URI as string, {
+            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+        });
+        console.log('MongoDB connected natively within Next.js API instance');
+    } catch (error) {
+        console.error('MongoDB connection error:', error);
+        throw error;
+    }
 };
 
 export default app;
