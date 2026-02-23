@@ -20,6 +20,7 @@ const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
         expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax' as const,
         path: '/'
     };
 
@@ -141,13 +142,25 @@ export const loginShopOwner = async (req: Request, res: Response): Promise<void>
 };
 
 export const logout = (req: Request, res: Response): void => {
-    res.cookie('token', 'none', {
-        expires: new Date(Date.now() - 10 * 1000),
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax' as const,
         path: '/'
+    };
+
+    res.cookie('token', 'none', {
+        ...options,
+        expires: new Date(Date.now() - 10 * 1000)
     });
-    res.status(200).json({ success: true, data: {} });
+
+    res.clearCookie('token', options);
+
+    res.status(200).json({ success: true, message: 'Successfully logged out' });
 };
 
 export const updateProfile = async (req: Request, res: Response): Promise<void> => {

@@ -25,11 +25,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     login: (userData) => set({ user: userData, isAuthenticated: true }),
     logout: async () => {
         try {
-            await api.get('/auth/logout');
+            await api.post('/auth/logout');
             set({ user: null, isAuthenticated: false });
             useCartStore.getState().clearCart();
             if (typeof window !== 'undefined') {
-                window.location.href = '/';
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                window.location.replace('/');
             }
         } catch (err) {
             console.error('Logout failed', err);

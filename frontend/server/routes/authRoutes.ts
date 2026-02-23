@@ -19,7 +19,7 @@ router.post('/user/register', registerUser);
 router.post('/user/login', loginUser);
 router.post('/shop-owner/register', registerShopOwner);
 router.post('/shop-owner/login', loginShopOwner);
-router.get('/logout', logout);
+router.post('/logout', logout);
 router.get('/me', protect, getMe);
 router.put('/me', protect, updateProfile);
 
