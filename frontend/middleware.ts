@@ -17,16 +17,9 @@ export function middleware(req: NextRequest) {
     const isMerchantDomain = hostname.startsWith('merchant-') || hostname.startsWith('merchant.');
 
     if (isMerchantDomain) {
-        // If they navigate to the raw root path on the merchant domain, redirect or rewrite to seller dashboard
+        // Render the dedicated Seller Homepage on root.
         if (url.pathname === '/') {
-            url.pathname = '/seller/dashboard';
-            return NextResponse.rewrite(url);
-        }
-
-        // If they navigate to a standard path on the merchant domain, rewrite it to point under the /seller tree
-        // Example: merchant-golemarket.vercel.app/login -> rewrites to -> /seller/login
-        if (!url.pathname.startsWith('/seller')) {
-            url.pathname = `/seller${url.pathname}`;
+            url.pathname = '/seller';
             return NextResponse.rewrite(url);
         }
     }
