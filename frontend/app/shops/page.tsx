@@ -4,17 +4,27 @@ import { useEffect, useState } from "react";
 import api from "../../lib/api";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, Star } from "lucide-react";
 
-export default function ShopsListing() {
+function ShopsListingContent() {
+    const searchParams = useSearchParams();
+    const initialSection = searchParams?.get('section') || "";
+
     const [shops, setShops] = useState([]);
     const [sections, setSections] = useState([]);
-    const [selectedSection, setSelectedSection] = useState("");
+    const [selectedSection, setSelectedSection] = useState(initialSection);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchSections();
     }, []);
+
+    useEffect(() => {
+        const urlSection = searchParams?.get('section') || "";
+        setSelectedSection(urlSection);
+    }, [searchParams]);
 
     useEffect(() => {
         fetchShops();
@@ -122,5 +132,13 @@ export default function ShopsListing() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function ShopsListing() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 py-12 flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>}>
+            <ShopsListingContent />
+        </Suspense>
     );
 }

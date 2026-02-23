@@ -5,7 +5,7 @@ export default function Footer() {
     return (
         <footer className="bg-white border-t border-gray-100 pt-16 mt-auto overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
 
                     {/* Brand & Newsletter Column - Wider */}
                     <div className="lg:col-span-2 flex flex-col gap-6">
@@ -47,15 +47,7 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* For Partners Column */}
-                    <div>
-                        <h3 className="font-bold text-gray-900 mb-6 text-sm uppercase tracking-wider">For Partners</h3>
-                        <ul className="space-y-4">
-                            <li><Link href="/seller/register" className="text-gray-500 font-medium hover:text-primary-600 transition-colors">Start Selling</Link></li>
-                            <li><Link href="/seller/login" className="text-gray-500 font-medium hover:text-primary-600 transition-colors">Seller Dashboard</Link></li>
-                            <li><Link href="#" className="text-gray-500 font-medium hover:text-primary-600 transition-colors">Partner Rules</Link></li>
-                        </ul>
-                    </div>
+
 
                     {/* Legal & Contact Column */}
                     <div>

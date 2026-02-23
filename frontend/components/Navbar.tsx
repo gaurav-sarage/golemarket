@@ -40,8 +40,8 @@ export default function Navbar() {
                                 <div className="p-2 sm:p-2.5 bg-primary-100 rounded-xl lg:rounded-2xl group-hover:scale-105 transition-transform duration-300">
                                     <Store className="h-6 w-6 sm:h-7 sm:w-7 text-primary-600" />
                                 </div>
-                                <span className="font-heading font-extrabold text-xl sm:text-2xl tracking-tight text-gray-900 group-hover:text-primary-600 transition-colors">
-                                    GoleCentral
+                                <span className="font-heading font-extrabold text-xl sm:text-2xl tracking-tight text-gray-900 group-hover:text-primary-600 transition-colors flex items-center gap-1">
+                                    GoleCentral {pathname?.includes('dashboard') && <span className="text-primary-600 font-bold text-lg sm:text-xl ml-1 mt-0.5 px-2 py-0.5 bg-primary-50 rounded-lg">Dashboard</span>}
                                 </span>
                             </Link>
                         </div>
