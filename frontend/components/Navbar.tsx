@@ -40,8 +40,8 @@ export default function Navbar() {
                                 <div className="p-2 sm:p-2.5 bg-primary-100 rounded-xl lg:rounded-2xl group-hover:scale-105 transition-transform duration-300">
                                     <Store className="h-6 w-6 sm:h-7 sm:w-7 text-primary-600" />
                                 </div>
-                                <span className="font-heading font-extrabold text-xl sm:text-2xl tracking-tight text-gray-900 group-hover:text-primary-600 transition-colors flex items-center gap-1">
-                                    GoleCentral {pathname?.includes('dashboard') && <span className="text-primary-600 font-bold text-lg sm:text-xl ml-1 mt-0.5 px-2 py-0.5 bg-primary-50 rounded-lg">Dashboard</span>}
+                                <span className="font-heading font-extrabold text-xl sm:text-2xl tracking-tight text-gray-900 group-hover:text-primary-600 transition-colors">
+                                    GoleCentral
                                 </span>
                             </Link>
                         </div>
@@ -86,8 +86,9 @@ export default function Navbar() {
                                     </div>
 
                                     {user?.role === 'customer' ? (
-                                        <Link href="/dashboard" title="My Account" className="text-gray-600 hover:text-primary-600 bg-white hover:bg-primary-50 border-2 border-gray-100 shadow-sm p-3 rounded-2xl transition-all active:scale-95 hover:border-primary-100">
-                                            <Package className="h-6 w-6" />
+                                        <Link href="/dashboard" title="My Account" className="flex items-center gap-2 text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-100 shadow-sm px-4 py-2.5 rounded-2xl transition-all active:scale-95 font-bold">
+                                            <Package className="h-5 w-5" />
+                                            <span className="hidden lg:inline text-sm">Dashboard</span>
                                         </Link>
                                     ) : (
                                         <Link href="/seller/dashboard" className="text-base font-bold text-white bg-primary-600 hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-500/20 px-6 py-3 rounded-2xl transition-all active:scale-95">
@@ -172,7 +173,7 @@ export default function Navbar() {
                                     <div className="grid grid-cols-2 gap-3">
                                         {user?.role === 'customer' ? (
                                             <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 active:scale-95 transition-all">
-                                                <Package className="w-5 h-5" /> Account
+                                                <Package className="w-5 h-5" /> Dashboard
                                             </Link>
                                         ) : (
                                             <Link href="/seller/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 p-3 bg-primary-600 border border-primary-600 rounded-xl font-bold text-white hover:bg-primary-700 active:scale-95 transition-all">

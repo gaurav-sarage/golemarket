@@ -169,25 +169,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust & Platform Features Section */}
-      <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full bg-gray-50">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {TRUST_FEATURES.map((feat, i) => {
-            const Icon = feat.icon;
-            return (
-              <div key={i} className="text-left flex flex-col gap-5 p-8 bg-white border border-gray-100 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-14 h-14 rounded-2xl bg-[#faf5ff] text-[#c026d3] flex items-center justify-center shrink-0">
-                  <Icon className="w-7 h-7" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 text-lg mb-2">{feat.title}</h3>
-                  <p className="text-gray-500 text-sm font-medium leading-relaxed">{feat.desc}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
     </div>
   );
