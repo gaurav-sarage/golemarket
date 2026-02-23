@@ -17,6 +17,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
     const [product, setProduct] = useState<any>(null);
     const [shop, setShop] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     const { addToCart } = useCartStore();
 
@@ -32,15 +33,17 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                 if (data.data.shopId) {
                     fetchShopDetails(data.data.shopId);
                 }
+            } else {
+                setErrorMsg(data.message || "Product not found.");
             }
-        } catch (err) {
-            console.error(err);
+        } catch (err: any) {
+            setErrorMsg(err.response?.data?.message || err.message || "Failed to fetch product.");
         } finally {
             setIsLoading(false);
         }
     };
 
-    const fetchShopDetails = async (shopId: string) => {
+    const fetchShopDetails = async (shopId: any) => {
         try {
             const idVal = typeof shopId === 'object' ? (shopId as any)._id : shopId;
             const { data } = await api.get(`/shops/${idVal}`);
@@ -67,10 +70,10 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         );
     }
 
-    if (!product) {
+    if (errorMsg || !product) {
         return (
             <div className="min-h-screen flex flex-col justify-center items-center gap-4">
-                <p className="text-xl text-gray-500 font-medium">Product not found.</p>
+                <p className="text-xl text-gray-500 font-medium">{errorMsg || "Product not found."}</p>
                 <button onClick={() => router.back()} className="text-primary-600 font-bold hover:underline">Go Back</button>
             </div>
         );
@@ -190,8 +193,8 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                                 onClick={handleAddToCart}
                                 disabled={product.stockQuantity === 0}
                                 className={`w-full py-5 rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 transition-all shadow-xl shadow-primary-500/10 active:scale-95 ${product.stockQuantity === 0
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
-                                        : 'bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-1'
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
+                                    : 'bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-1'
                                     }`}
                             >
                                 <ShoppingCart className="w-6 h-6" />

@@ -35,7 +35,10 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
     try {
         const product = await Product.findById(req.params.id).populate('shopId', 'name').populate('categoryId', 'name').exec();
-        if (!product) { res.status(404).json({ success: false, message: 'Product not found' }); return; }
+        if (!product) {
+            res.status(404).json({ success: false, message: 'Product not found' });
+            return;
+        }
         res.status(200).json({ success: true, data: product });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });

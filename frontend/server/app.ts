@@ -13,6 +13,15 @@ import cartRoutes from './routes/cartRoutes';
 import orderRoutes from './routes/orderRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 
+// Register Models for populate
+import './models/User';
+import './models/Shop';
+import './models/Product';
+import './models/Category';
+import './models/Order';
+import './models/Cart';
+import './models/Section';
+
 dotenv.config();
 
 const app = express();
