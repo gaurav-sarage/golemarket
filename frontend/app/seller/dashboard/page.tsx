@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store } from "lucide-react";
+import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -29,8 +29,14 @@ export default function SellerDashboard() {
     // New product state
     const [isAddingProduct, setIsAddingProduct] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
-    const [newProduct, setNewProduct] = useState({
-        name: '', description: '', price: '', sku: '', stockQuantity: '', categoryId: ''
+    const [newProduct, setNewProduct] = useState<any>({
+        name: '', description: '', price: '', salePrice: '', sku: '', stockQuantity: '', categoryId: '',
+        foodCategory: 'Veg', preparationTime: '', portionSize: '', stockLimitPerDay: '',
+        categoryName: '', subCategoryName: '', unitType: 'Piece', minimumOrderQuantity: '', expiryDate: '',
+        serviceDuration: '', vehicleCompatibility: '', availableDays: '',
+        deliveryEligibility: true, pickupAvailability: true, trackInventory: true,
+        appointmentRequired: false, taxIndicator: false,
+        productStatus: 'Published', availabilityStatus: 'Available'
     });
 
     useEffect(() => {
@@ -118,13 +124,15 @@ export default function SellerDashboard() {
         e.preventDefault();
         try {
             const formData = new FormData();
-            formData.append('name', newProduct.name);
-            formData.append('description', newProduct.description);
-            formData.append('price', String(newProduct.price));
-            formData.append('sku', newProduct.sku);
-            formData.append('stockQuantity', String(newProduct.stockQuantity));
+            Object.keys(newProduct).forEach(key => {
+                if (newProduct[key] !== '' && newProduct[key] !== undefined) {
+                    formData.append(key, String(newProduct[key]));
+                }
+            });
             formData.append('shopId', shop._id);
-            formData.append('categoryId', newProduct.categoryId || '600000000000000000000000');
+            if (!newProduct.categoryId) {
+                formData.append('categoryId', '600000000000000000000000');
+            }
 
             if (imageFile) {
                 formData.append('image', imageFile);
@@ -140,7 +148,15 @@ export default function SellerDashboard() {
                 toast.success("Product added!");
                 setProducts([...products, data.data]);
                 setIsAddingProduct(false);
-                setNewProduct({ name: '', description: '', price: '', sku: '', stockQuantity: '', categoryId: '' });
+                setNewProduct({
+                    name: '', description: '', price: '', salePrice: '', sku: '', stockQuantity: '', categoryId: '',
+                    foodCategory: 'Veg', preparationTime: '', portionSize: '', stockLimitPerDay: '',
+                    categoryName: '', subCategoryName: '', unitType: 'Piece', minimumOrderQuantity: '', expiryDate: '',
+                    serviceDuration: '', vehicleCompatibility: '', availableDays: '',
+                    deliveryEligibility: true, pickupAvailability: true, trackInventory: true,
+                    appointmentRequired: false, taxIndicator: false,
+                    productStatus: 'Published', availabilityStatus: 'Available'
+                });
                 setImageFile(null);
 
                 // Refresh analytics to update stats quickly
@@ -355,68 +371,304 @@ export default function SellerDashboard() {
                         </div>
 
                         {isAddingProduct && (
-                            <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-gray-100 mb-8 max-w-4xl mx-auto">
-                                <h3 className="text-2xl font-bold mb-8 border-b pb-4 text-gray-900">Create New Product</h3>
-                                <form onSubmit={handleCreateProduct} className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-gray-100 mb-8 max-w-6xl mx-auto">
+                                <div className="flex justify-between items-center mb-8 border-b pb-4">
+                                    <h3 className="text-2xl font-bold text-gray-900">Add New {shop?.shopType === 'salons' ? 'Service' : 'Product'}</h3>
+                                    <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-lg text-sm font-bold capitalize">
+                                        <Tag className="w-4 h-4" /> {shop?.shopType || 'General'}
+                                    </div>
+                                </div>
+                                <form onSubmit={handleCreateProduct} className="space-y-8">
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-                                        {/* Left Column */}
-                                        <div className="space-y-6">
-                                            <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
-                                                <input required type="text" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} className="w-full border-gray-300 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-gray-50 focus:bg-white" placeholder="e.g. Premium Wireless Headphones" />
+                                        {/* Column 1: Core Info */}
+                                        <div className="lg:col-span-2 space-y-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-sm font-bold text-gray-700 mb-2">Item Name</label>
+                                                    <input required type="text" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder={`e.g. ${shop?.shopType === 'restaurant' ? 'Butter Chicken' : 'Premium Product'}`} />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-2">Price (₹)</label>
+                                                    <input required type="number" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="0.00" />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-2">Sale Price (Optional)</label>
+                                                    <input type="number" value={newProduct.salePrice} onChange={e => setNewProduct({ ...newProduct, salePrice: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="0.00" />
+                                                </div>
+
+                                                {/* SKU Logic */}
+                                                <div>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-2">SKU</label>
+                                                    <div className="relative">
+                                                        <input required type="text" value={newProduct.sku} onChange={e => setNewProduct({ ...newProduct, sku: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="AUTO-GEN" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewProduct({ ...newProduct, sku: `SKU-${Math.random().toString(36).substring(2, 8).toUpperCase()}` })}
+                                                            className="absolute right-2 top-2 px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors"
+                                                        >
+                                                            Generate
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Dynamic Category/Type based on Shop Type */}
+                                                {shop?.shopType === 'restaurant' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Food Category</label>
+                                                        <select value={newProduct.foodCategory} onChange={e => setNewProduct({ ...newProduct, foodCategory: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white">
+                                                            <option value="Veg">Veg</option>
+                                                            <option value="Non-Veg">Non-Veg</option>
+                                                            <option value="Beverage">Beverage</option>
+                                                            <option value="Combo">Combo</option>
+                                                        </select>
+                                                    </div>
+                                                )}
+
+                                                {(shop?.shopType === 'grocery' || shop?.shopType === 'general stores') && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Unit Type</label>
+                                                        <select value={newProduct.unitType} onChange={e => setNewProduct({ ...newProduct, unitType: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white">
+                                                            <option value="Kg">Kg</option>
+                                                            <option value="Gram">Gram</option>
+                                                            <option value="Litre">Litre</option>
+                                                            <option value="Piece">Piece</option>
+                                                            <option value="Pack">Pack</option>
+                                                            <option value="Box">Box</option>
+                                                        </select>
+                                                    </div>
+                                                )}
+
+                                                {shop?.shopType === 'salons' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Service Category</label>
+                                                        <input type="text" value={newProduct.categoryName} onChange={e => setNewProduct({ ...newProduct, categoryName: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="Hair / Skin / Grooming" />
+                                                    </div>
+                                                )}
+
+                                                {shop?.shopType === 'salons' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Duration (Min)</label>
+                                                        <input type="number" value={newProduct.serviceDuration} onChange={e => setNewProduct({ ...newProduct, serviceDuration: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="30" />
+                                                    </div>
+                                                )}
+
+                                                {shop?.shopType === 'salons' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Available Days</label>
+                                                        <input type="text" value={newProduct.availableDays} onChange={e => setNewProduct({ ...newProduct, availableDays: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="e.g. Mon, Tue, Fri" />
+                                                    </div>
+                                                )}
+
+                                                {shop?.shopType === 'restaurant' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Prep Time (Min)</label>
+                                                        <input type="number" value={newProduct.preparationTime} onChange={e => setNewProduct({ ...newProduct, preparationTime: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="15" />
+                                                    </div>
+                                                )}
+
+                                                {shop?.shopType === 'restaurant' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Portion / Size</label>
+                                                        <input type="text" value={newProduct.portionSize} onChange={e => setNewProduct({ ...newProduct, portionSize: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="e.g. Full, Half, Regular" />
+                                                    </div>
+                                                )}
+
+                                                {shop?.shopType === 'restaurant' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Daily Stock Limit (Opt)</label>
+                                                        <input type="number" value={newProduct.stockLimitPerDay} onChange={e => setNewProduct({ ...newProduct, stockLimitPerDay: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="e.g. 50" />
+                                                    </div>
+                                                )}
+
+                                                {shop?.shopType === 'auto' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Item Type</label>
+                                                        <select value={newProduct.foodCategory} onChange={e => setNewProduct({ ...newProduct, foodCategory: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white">
+                                                            <option value="Parts">Parts</option>
+                                                            <option value="Service">Service</option>
+                                                        </select>
+                                                    </div>
+                                                )}
+
+                                                {shop?.shopType === 'grocery' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Weight Variant</label>
+                                                        <input type="text" value={newProduct.portionSize} onChange={e => setNewProduct({ ...newProduct, portionSize: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="e.g. 500g, 1kg, 5kg" />
+                                                    </div>
+                                                )}
+
+                                                {(shop?.shopType === 'grocery' || shop?.shopType === 'general stores') && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Min. Order Qty</label>
+                                                        <input type="number" value={newProduct.minimumOrderQuantity} onChange={e => setNewProduct({ ...newProduct, minimumOrderQuantity: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="1" />
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹)</label>
-                                                    <input required type="number" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} className="w-full border-gray-300 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-gray-50 focus:bg-white" placeholder="0.00" />
+                                            {/* Advanced Category / Subcategory */}
+                                            {shop?.shopType !== 'restaurant' && shop?.shopType !== 'salons' && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Category Name</label>
+                                                        <input type="text" value={newProduct.categoryName} onChange={e => setNewProduct({ ...newProduct, categoryName: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="Electronics / Clothing" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Subcategory</label>
+                                                        <input type="text" value={newProduct.subCategoryName} onChange={e => setNewProduct({ ...newProduct, subCategoryName: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="Sub-category" />
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Stock Inventory</label>
-                                                    <input required type="number" value={newProduct.stockQuantity} onChange={e => setNewProduct({ ...newProduct, stockQuantity: e.target.value })} className="w-full border-gray-300 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-gray-50 focus:bg-white" placeholder="0" />
-                                                </div>
-                                            </div>
+                                            )}
 
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product SKU</label>
-                                                <input required type="text" value={newProduct.sku} onChange={e => setNewProduct({ ...newProduct, sku: e.target.value })} className="w-full border-gray-300 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-gray-50 focus:bg-white" placeholder="SKU-XXXXXX" />
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                                                <textarea required value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white resize-none h-40" placeholder="Describe your product/service features, benefits..." />
+                                            </div>
+
+                                            {/* Type Specific Extras */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {shop?.shopType === 'grocery' && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Expiry Date</label>
+                                                        <input type="date" value={newProduct.expiryDate} onChange={e => setNewProduct({ ...newProduct, expiryDate: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" />
+                                                    </div>
+                                                )}
+                                                {shop?.shopType === 'auto' && (
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Vehicle Compatibility</label>
+                                                        <input type="text" value={newProduct.vehicleCompatibility} onChange={e => setNewProduct({ ...newProduct, vehicleCompatibility: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="e.g. BMW X5 2018-2022, Toyota Camry..." />
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
-                                        {/* Right Column */}
+                                        {/* Column 2: Status, Image & Inventory */}
                                         <div className="space-y-6">
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Image Gallery</label>
-                                                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer hover:border-primary-500 transition-colors bg-gray-50" onClick={() => document.getElementById('file-upload')?.click()}>
-                                                    <div className="space-y-1 text-center">
-                                                        {imageFile ? (
-                                                            <p className="text-primary-600 font-medium mb-2">{imageFile.name}</p>
-                                                        ) : (
-                                                            <div className="flex flex-col items-center">
-                                                                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                                </svg>
-                                                                <p className="text-sm text-gray-600 mt-2">Click to select an image</p>
-                                                            </div>
-                                                        )}
-                                                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={e => {
-                                                            if (e.target.files && e.target.files[0]) setImageFile(e.target.files[0]);
-                                                        }} />
-                                                    </div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">Product Image</label>
+                                                <div className="mt-1 flex flex-col items-center justify-center p-6 border-2 border-gray-200 border-dashed rounded-2xl cursor-pointer hover:border-primary-500 transition-all bg-gray-50/50 group" onClick={() => document.getElementById('product-file-upload')?.click()}>
+                                                    {imageFile ? (
+                                                        <div className="text-center">
+                                                            <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-2" />
+                                                            <p className="text-primary-600 font-bold text-sm truncate max-w-[150px]">{imageFile.name}</p>
+                                                            <p className="text-gray-400 text-xs mt-1">Tap to change</p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center">
+                                                            <Plus className="w-10 h-10 text-gray-300 group-hover:text-primary-400 mx-auto mb-2" />
+                                                            <p className="text-sm font-bold text-gray-500 group-hover:text-primary-600">Upload Media</p>
+                                                            <p className="text-xs text-gray-400 mt-1">JPG, PNG up to 5MB</p>
+                                                        </div>
+                                                    )}
+                                                    <input id="product-file-upload" type="file" className="sr-only" accept="image/*" onChange={e => {
+                                                        if (e.target.files && e.target.files[0]) setImageFile(e.target.files[0]);
+                                                    }} />
                                                 </div>
                                             </div>
 
-                                            <div>
-                                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Description</label>
-                                                <textarea required value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} className="w-full border-gray-300 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-gray-50 focus:bg-white resize-none h-32" placeholder="Write a gorgeous description for what makes this product so special..." />
+                                            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 space-y-6">
+                                                <h4 className="text-sm font-bold text-gray-900 border-b pb-3 mb-2 flex items-center gap-2">
+                                                    <Info className="w-4 h-4 text-primary-500" /> Inventory & Status
+                                                </h4>
+
+                                                {shop?.shopType !== 'salons' && (
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Stock Quantity</label>
+                                                        <input type="number" value={newProduct.stockQuantity} onChange={e => setNewProduct({ ...newProduct, stockQuantity: e.target.value })} className="w-full border-gray-200 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-white" placeholder="0" />
+                                                    </div>
+                                                )}
+
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm font-bold text-gray-700">{shop?.shopType === 'salons' ? 'Active' : 'Available'}</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewProduct({ ...newProduct, availabilityStatus: newProduct.availabilityStatus === 'Available' ? 'Out of Stock' : 'Available' })}
+                                                            className={`w-12 h-6 rounded-full transition-all relative ${newProduct.availabilityStatus === 'Available' ? 'bg-green-500' : 'bg-gray-300'}`}
+                                                        >
+                                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${newProduct.availabilityStatus === 'Available' ? 'right-1' : 'left-1'}`} />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm font-bold text-gray-700">Pickup</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewProduct({ ...newProduct, pickupAvailability: !newProduct.pickupAvailability })}
+                                                            className={`w-12 h-6 rounded-full transition-all relative ${newProduct.pickupAvailability ? 'bg-teal-500' : 'bg-gray-300'}`}
+                                                        >
+                                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${newProduct.pickupAvailability ? 'right-1' : 'left-1'}`} />
+                                                        </button>
+                                                    </div>
+
+                                                    {shop?.shopType !== 'salons' && (
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-sm font-bold text-gray-700">Track Stock</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setNewProduct({ ...newProduct, trackInventory: !newProduct.trackInventory })}
+                                                                className={`w-12 h-6 rounded-full transition-all relative ${newProduct.trackInventory ? 'bg-blue-600' : 'bg-gray-300'}`}
+                                                            >
+                                                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${newProduct.trackInventory ? 'right-1' : 'left-1'}`} />
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm font-bold text-gray-700">Published</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewProduct({ ...newProduct, productStatus: newProduct.productStatus === 'Published' ? 'Draft' : 'Published' })}
+                                                            className={`w-12 h-6 rounded-full transition-all relative ${newProduct.productStatus === 'Published' ? 'bg-primary-600' : 'bg-gray-300'}`}
+                                                        >
+                                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${newProduct.productStatus === 'Published' ? 'right-1' : 'left-1'}`} />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm font-bold text-gray-700">Delivery</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewProduct({ ...newProduct, deliveryEligibility: !newProduct.deliveryEligibility })}
+                                                            className={`w-12 h-6 rounded-full transition-all relative ${newProduct.deliveryEligibility ? 'bg-secondary-500' : 'bg-gray-300'}`}
+                                                        >
+                                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${newProduct.deliveryEligibility ? 'right-1' : 'left-1'}`} />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm font-bold text-gray-700">Tax Included</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewProduct({ ...newProduct, taxIndicator: !newProduct.taxIndicator })}
+                                                            className={`w-12 h-6 rounded-full transition-all relative ${newProduct.taxIndicator ? 'bg-indigo-500' : 'bg-gray-300'}`}
+                                                        >
+                                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${newProduct.taxIndicator ? 'right-1' : 'left-1'}`} />
+                                                        </button>
+                                                    </div>
+
+                                                    {(shop?.shopType === 'salons' || shop?.shopType === 'auto') && (
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-sm font-bold text-gray-700">Appointment Req.</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setNewProduct({ ...newProduct, appointmentRequired: !newProduct.appointmentRequired })}
+                                                                className={`w-12 h-6 rounded-full transition-all relative ${newProduct.appointmentRequired ? 'bg-amber-500' : 'bg-gray-300'}`}
+                                                            >
+                                                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${newProduct.appointmentRequired ? 'right-1' : 'left-1'}`} />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-4 justify-end mt-10 border-t pt-6">
-                                        <button type="button" onClick={() => setIsAddingProduct(false)} className="px-6 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
-                                        <button type="submit" className="bg-primary-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-700 shadow-md transition-all hover:-translate-y-0.5">Publish Product</button>
+                                    <div className="flex gap-4 justify-end mt-10 border-t pt-8">
+                                        <button type="button" onClick={() => setIsAddingProduct(false)} className="px-8 py-3.5 text-gray-500 font-bold hover:bg-gray-100 rounded-xl transition-all">Discard</button>
+                                        <button type="submit" className="bg-primary-600 text-white px-10 py-3.5 rounded-xl font-bold hover:bg-primary-700 shadow-xl shadow-primary-500/20 transition-all hover:-translate-y-1 active:scale-95">Complete & Publish</button>
                                     </div>
                                 </form>
                             </div>
