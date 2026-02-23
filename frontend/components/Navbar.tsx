@@ -14,7 +14,13 @@ export default function Navbar() {
     const { user, isAuthenticated, logout, checkAuth } = useAuthStore();
     const { shops, fetchCart } = useCartStore();
     const pathname = usePathname();
-    const isSellerPath = pathname?.startsWith('/seller');
+    const [isMerchantDomain, setIsMerchantDomain] = useState(false);
+
+    useEffect(() => {
+        setIsMerchantDomain(window.location.hostname.startsWith('merchant-') || window.location.hostname.startsWith('merchant.'));
+    }, []);
+
+    const isSellerPath = pathname?.startsWith('/seller') || isMerchantDomain;
 
     useEffect(() => {
         checkAuth();

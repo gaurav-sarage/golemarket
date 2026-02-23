@@ -22,6 +22,22 @@ export function middleware(req: NextRequest) {
             url.pathname = '/seller';
             return NextResponse.rewrite(url);
         }
+
+        // Block customer auth/dashboard routes and force them into seller experiences
+        if (url.pathname === '/login') {
+            url.pathname = '/seller/login';
+            return NextResponse.rewrite(url);
+        }
+
+        if (url.pathname === '/register') {
+            url.pathname = '/seller/register';
+            return NextResponse.rewrite(url);
+        }
+
+        if (url.pathname === '/dashboard') {
+            url.pathname = '/seller/dashboard';
+            return NextResponse.rewrite(url);
+        }
     }
 
     // Default return for all other domains (e.g. customer marketplace)
