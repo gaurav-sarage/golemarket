@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ShoppingBag, Utensils, Zap, Laptop, Scissors, Store, Coffee, Car, ShieldCheck, Clock, CheckCircle, ShoppingCart } from "lucide-react";
+import { ArrowRight, ShoppingBag, Utensils, Zap, Laptop, Scissors, Store, Coffee, Car, ShieldCheck, Clock, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useRef } from "react";
 
 const CATEGORIES = [
   { id: "restaurants", name: "Restaurants", icon: Utensils, color: "bg-red-100 text-red-600" },
@@ -26,17 +26,25 @@ const FEATURED_SHOPS = [
   { id: 1, name: "FreshMart Groceries", category: "Grocery", rating: 4.8, img: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=400" },
   { id: 2, name: "The Daily Grind Cafe", category: "Cafes", rating: 4.9, img: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400" },
   { id: 3, name: "Elite Auto Care", category: "Auto", rating: 4.7, img: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=400" },
-  { id: 4, name: "Style & Grace Salon", category: "Salons", rating: 4.6, img: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=400" }
-];
-
-const FEATURED_PRODUCTS = [
-  { id: 1, name: "Organic Avocados (1kg)", price: 450, shop: "FreshMart Groceries", img: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&q=80&w=400" },
-  { id: 2, name: "Artisan Coffee Beans", price: 850, shop: "The Daily Grind Cafe", img: "https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80&w=400" },
-  { id: 3, name: "Premium Car Polish", price: 1200, shop: "Elite Auto Care", img: "https://images.unsplash.com/photo-1622353341144-ec8a01fcedde?auto=format&fit=crop&q=80&w=400" },
-  { id: 4, name: "Luxury Hair Serum", price: 1550, shop: "Style & Grace Salon", img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=400" }
+  { id: 4, name: "Style & Grace Salon", category: "Salons", rating: 4.6, img: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=400" },
+  { id: 5, name: "City Market Goods", category: "General Stores", rating: 4.5, img: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&q=80&w=400" }
 ];
 
 export default function Home() {
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="bg-gray-50 flex flex-col w-full h-full min-h-screen pt-16 sm:pt-20 lg:pt-24">
       {/* Hero Section */}
@@ -98,34 +106,48 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.4 }}
-                className="group p-6 sm:p-8 rounded-3xl bg-white shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary-100 transition-all duration-300 cursor-pointer text-center flex flex-col items-center"
               >
-                <div className={`w-16 h-16 sm:w-20 sm:h-20 mb-4 rounded-2xl flex items-center justify-center ${sec.color} group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
-                  <Icon className="w-8 h-8 sm:w-10 sm:h-10" />
-                </div>
-                <h3 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">{sec.name}</h3>
+                <Link href={`/shops/${sec.id}`} className="block group p-6 sm:p-8 rounded-3xl bg-white shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary-100 transition-all duration-300 text-center flex flex-col items-center w-full h-full">
+                  <div className={`w-16 h-16 sm:w-20 sm:h-20 mb-4 rounded-2xl flex items-center justify-center ${sec.color} group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+                    <Icon className="w-8 h-8 sm:w-10 sm:h-10" />
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">{sec.name}</h3>
+                </Link>
               </motion.div>
             )
           })}
         </div>
       </section>
 
-      {/* Featured Shops Section */}
-      <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 sm:mb-12 gap-4">
+      {/* Featured Shops Section (Carousel) */}
+      <section className="py-20 sm:py-24 pl-4 sm:pl-6 lg:pl-8 lg:pr-8 mx-auto w-full overflow-hidden max-w-[1400px]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 sm:mb-12 gap-4 max-w-7xl mx-auto px-4 sm:px-0">
           <div>
             <h2 className="text-3xl sm:text-4xl font-heading font-extrabold text-gray-900 tracking-tight mb-3">Featured Shops</h2>
             <p className="text-gray-600 font-medium text-lg">Discover the highest rated vendors in town.</p>
           </div>
-          <Link href="/shops" className="text-primary-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
-            View All <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/shops" className="text-primary-600 font-bold flex items-center gap-1 hover:gap-2 transition-all mr-2">
+              View All <ArrowRight className="w-4 h-4" />
+            </Link>
+            <div className="hidden sm:flex items-center gap-2">
+              <button onClick={scrollLeft} className="p-3 bg-white border border-gray-200 text-gray-600 rounded-full hover:bg-primary-50 hover:text-primary-600 transition-colors shadow-sm focus:outline-none active:scale-95">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button onClick={scrollRight} className="p-3 bg-white border border-gray-200 text-gray-600 rounded-full hover:bg-primary-50 hover:text-primary-600 transition-colors shadow-sm focus:outline-none active:scale-95">
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Mobile Swipeable / Desktop Grid */}
-        <div className="flex overflow-x-auto sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-8 sm:pb-0 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-          {FEATURED_SHOPS.map((shop, i) => (
-            <div key={shop.id} className="min-w-[280px] sm:min-w-0 bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary-100 transition-all duration-300 flex flex-col snap-center group">
+        <div
+          ref={carouselRef}
+          className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar mx-auto max-w-7xl px-4 sm:px-0"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {FEATURED_SHOPS.map((shop) => (
+            <div key={shop.id} className="min-w-[280px] sm:min-w-[300px] bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary-100 transition-all duration-300 flex flex-col snap-center group">
               <div className="h-48 overflow-hidden relative">
                 <img src={shop.img} alt={shop.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-900 flex items-center gap-1 shadow-sm">
@@ -135,7 +157,7 @@ export default function Home() {
               <div className="p-6 flex flex-col flex-grow">
                 <p className="text-xs font-bold uppercase tracking-wider text-primary-600 mb-2">{shop.category}</p>
                 <h3 className="font-bold text-xl text-gray-900 mb-6 line-clamp-1">{shop.name}</h3>
-                <Link href={`/shops`} className="mt-auto w-full py-3 bg-gray-50 text-gray-900 font-bold rounded-xl text-center group-hover:bg-primary-600 group-hover:text-white transition-colors border border-gray-200 group-hover:border-primary-600 shadow-sm active:scale-95">
+                <Link href={`/shops/${shop.id}`} className="mt-auto w-full py-3 bg-gray-50 text-gray-900 font-bold rounded-xl text-center group-hover:bg-primary-600 group-hover:text-white transition-colors border border-gray-200 group-hover:border-primary-600 shadow-sm active:scale-95">
                   Visit Store
                 </Link>
               </div>
@@ -144,48 +166,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full bg-gray-50">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 sm:mb-12 gap-4">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-heading font-extrabold text-gray-900 tracking-tight mb-3">Trending Products</h2>
-            <p className="text-gray-600 font-medium text-lg">Top picks delivered straight to you.</p>
-          </div>
-          <Link href="/shops" className="text-primary-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
-            Shop Directory <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {FEATURED_PRODUCTS.map((prod) => (
-            <div key={prod.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary-100 transition-all duration-300 flex flex-col group p-4">
-              <div className="h-56 overflow-hidden relative rounded-2xl mb-5 bg-gray-100">
-                <img src={prod.img} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 mix-blend-multiply" />
-              </div>
-              <div className="flex flex-col flex-grow px-2">
-                <p className="text-xs font-bold text-gray-500 mb-1 flex items-center gap-1"><Store className="w-3 h-3" /> {prod.shop}</p>
-                <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2 leading-tight">{prod.name}</h3>
-                <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
-                  <span className="font-extrabold text-2xl text-gray-900">₹{prod.price}</span>
-                  <button className="h-10 w-10 bg-primary-50 text-primary-600 hover:bg-primary-600 hover:text-white rounded-xl flex items-center justify-center transition-colors active:scale-90 border border-primary-100 shadow-sm">
-                    <ShoppingCart className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Trust & Platform Features Section */}
-      <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full bg-gray-50">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {TRUST_FEATURES.map((feat, i) => {
             const Icon = feat.icon;
             return (
-              <div key={i} className="text-center sm:text-left flex flex-col sm:flex-row items-center sm:items-start gap-4 p-8 bg-white border border-gray-100 rounded-3xl shadow-sm hover:shadow-lg transition-shadow">
-                <div className="p-4 rounded-2xl bg-secondary-50 text-secondary-600 shrink-0">
-                  <Icon className="w-8 h-8" />
+              <div key={i} className="text-left flex flex-col gap-5 p-8 bg-white border border-gray-100 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-14 h-14 rounded-2xl bg-[#faf5ff] text-[#c026d3] flex items-center justify-center shrink-0">
+                  <Icon className="w-7 h-7" />
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 text-lg mb-2">{feat.title}</h3>
@@ -198,20 +187,22 @@ export default function Home() {
       </section>
 
       {/* Vendor Onboarding CTA Section */}
-      <section className="bg-gray-900 py-20 sm:py-24 px-4 relative overflow-hidden my-10 sm:my-20 mx-4 sm:mx-8 max-w-7xl lg:mx-auto rounded-[3rem] shadow-2xl">
+      <section className="py-20 sm:py-24 px-4 relative overflow-hidden my-10 sm:my-20 mx-4 sm:mx-8 max-w-5xl lg:mx-auto rounded-[2.5rem] bg-gradient-to-br from-[#10132A] via-[#1a1438] to-[#10132A] shadow-xl">
         <div className="absolute inset-0">
-          <div className="absolute -top-40 right-1/4 w-96 h-96 bg-primary-600 rounded-full blur-[100px] opacity-30" />
-          <div className="absolute bottom-0 left-10 w-72 h-72 bg-secondary-500 rounded-full blur-[100px] opacity-30" />
+          <div className="absolute -top-40 right-1/4 w-96 h-96 bg-[#2563eb] rounded-full blur-[100px] opacity-20" />
+          <div className="absolute bottom-0 left-10 w-72 h-72 bg-[#c026d3] rounded-full blur-[100px] opacity-10" />
         </div>
 
-        <div className="max-w-3xl mx-auto text-center text-white relative z-10">
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-heading font-extrabold mb-6 leading-tight tracking-tight">Start Selling in Minutes</h2>
-          <p className="text-gray-300 mb-10 text-lg sm:text-xl leading-relaxed font-medium">
+        <div className="px-6 lg:px-12 mx-auto text-center text-white relative z-10 flex flex-col items-center">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-heading font-extrabold mb-6 tracking-tight leading-tight max-w-2xl">
+            Start Selling in Minutes
+          </h2>
+          <p className="text-gray-300 mb-10 text-lg leading-relaxed font-medium max-w-2xl">
             Join thousands of local businesses growing their operations digitally with zero hassle.
           </p>
 
-          <Link href="/seller/register" className="inline-flex w-full sm:w-auto px-10 py-5 rounded-2xl bg-primary-600 text-white font-bold hover:bg-primary-500 hover:shadow-2xl hover:shadow-primary-500/30 active:scale-95 transition-all text-xl items-center justify-center gap-3">
-            <Store className="w-6 h-6" /> Open Your Virtual Store
+          <Link href="/seller/register" className="inline-flex w-full sm:w-auto px-8 py-4 rounded-[1.2rem] bg-[#2563eb] text-white font-bold hover:bg-[#1d4ed8] hover:shadow-lg active:scale-95 transition-all text-lg items-center justify-center gap-3">
+            <Store className="w-5 h-5" /> Open Your Virtual Store
           </Link>
         </div>
       </section>

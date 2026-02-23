@@ -36,14 +36,14 @@ export default function SellerLogin() {
     return (
         <div className="min-h-screen bg-white flex">
             {/* Left Panel - Image/Branding */}
-            <div className="hidden lg:flex w-1/2 bg-secondary-900 flex-col justify-between p-12 relative overflow-hidden">
+            <div className="hidden lg:flex w-1/2 bg-slate-900 flex-col justify-between p-12 relative overflow-hidden">
                 <div className="absolute inset-0">
                     <img
                         src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80"
                         alt="Seller Dashboard"
                         className="w-full h-full object-cover opacity-50 mix-blend-overlay"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-secondary-900 via-secondary-900/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent" />
                 </div>
 
                 <Link href="/" className="relative z-10 flex items-center gap-2 text-white group w-fit">
@@ -57,7 +57,7 @@ export default function SellerLogin() {
 
                 <div className="relative z-10 text-white max-w-md">
                     <h2 className="text-4xl font-heading font-bold mb-4 leading-tight">Empower your local business today.</h2>
-                    <p className="text-secondary-100 text-lg mb-8">Manage orders, track analytics, and build your digital storefront all in one dashboard.</p>
+                    <p className="text-slate-100 text-lg mb-8">Manage orders, track analytics, and build your digital storefront all in one dashboard.</p>
                 </div>
             </div>
 
@@ -67,8 +67,8 @@ export default function SellerLogin() {
                     <div className="mb-10 text-center lg:text-left">
                         <div className="flex justify-center lg:hidden mb-8">
                             <Link href="/" className="flex items-center gap-2">
-                                <div className="p-2 bg-secondary-100 rounded-xl">
-                                    <Store className="h-6 w-6 text-secondary-600" />
+                                <div className="p-2 bg-slate-100 rounded-xl">
+                                    <Store className="h-6 w-6 text-slate-600" />
                                 </div>
                                 <span className="font-heading font-extrabold text-2xl tracking-tight text-gray-900">
                                     GoleCentral
@@ -80,7 +80,7 @@ export default function SellerLogin() {
                         </h2>
                         <p className="text-gray-500">
                             Don't have a seller account?{" "}
-                            <Link href="/seller/register" className="font-bold text-secondary-600 hover:text-secondary-500 underline decoration-secondary-600/30 underline-offset-4 transition-all">
+                            <Link href="/seller/register" className="font-bold text-slate-600 hover:text-slate-500 underline decoration-slate-600/30 underline-offset-4 transition-all">
                                 Apply to sell
                             </Link>
                         </p>
@@ -98,7 +98,7 @@ export default function SellerLogin() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 block w-full pl-12 h-14 sm:text-sm border-gray-200 rounded-2xl bg-gray-50 outline-none border focus:bg-white transition-all font-medium text-gray-900 placeholder-gray-400 shadow-sm"
+                                    className="focus:ring-2 focus:ring-slate-500 focus:border-slate-500 block w-full pl-12 h-14 sm:text-sm border-gray-200 rounded-2xl bg-gray-50 outline-none border focus:bg-white transition-all font-medium text-gray-900 placeholder-gray-400 shadow-sm"
                                     placeholder="shop@example.com"
                                 />
                             </div>
@@ -107,7 +107,7 @@ export default function SellerLogin() {
                         <div>
                             <div className="flex justify-between items-center mb-2">
                                 <label className="block text-sm font-bold text-gray-700">Password</label>
-                                <Link href="/forgot-password" className="text-sm font-bold text-secondary-600 hover:text-secondary-500 transition-colors">
+                                <Link href="/forgot-password" className="text-sm font-bold text-slate-600 hover:text-slate-500 transition-colors">
                                     Forgot password?
                                 </Link>
                             </div>
@@ -120,7 +120,7 @@ export default function SellerLogin() {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 block w-full pl-12 pr-12 h-14 sm:text-sm border-gray-200 rounded-2xl bg-gray-50 outline-none border focus:bg-white transition-all font-medium text-gray-900 placeholder-gray-400 shadow-sm"
+                                    className="focus:ring-2 focus:ring-slate-500 focus:border-slate-500 block w-full pl-12 pr-12 h-14 sm:text-sm border-gray-200 rounded-2xl bg-gray-50 outline-none border focus:bg-white transition-all font-medium text-gray-900 placeholder-gray-400 shadow-sm"
                                     placeholder="••••••••"
                                 />
                                 <button
@@ -136,7 +136,7 @@ export default function SellerLogin() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full h-14 flex justify-center py-2 px-4 border border-transparent rounded-2xl shadow-sm text-base font-bold text-white bg-secondary-900 hover:bg-secondary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-900 transition-all items-center gap-2 active:scale-[0.98]"
+                            className="w-full h-14 flex justify-center py-2 px-4 border border-transparent rounded-2xl shadow-sm text-base font-bold text-white bg-slate-900 hover:bg-slate-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all items-center gap-2 active:scale-[0.98]"
                         >
                             {isLoading ? "Signing in..." : "Enter Dashboard"}
                         </button>
