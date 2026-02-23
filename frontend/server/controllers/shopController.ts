@@ -82,11 +82,14 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
             return;
         }
 
-        const { name, description, contactPhone, contactEmail, shopType } = req.body;
+        const { name, description, contactPhone, contactEmail, category, slug, businessHours } = req.body;
 
-        let section = await Section.findOne();
+        const safeCategory = category || 'others';
+        let sectionName = safeCategory === 'others' ? 'Others' : safeCategory.charAt(0).toUpperCase() + safeCategory.slice(1);
+
+        let section = await Section.findOne({ name: sectionName });
         if (!section) {
-            section = await Section.create({ name: 'General', description: 'General marketplace' });
+            section = await Section.create({ name: sectionName, description: `${sectionName} shops` });
         }
 
         let logoImage = '';
@@ -100,7 +103,9 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
             description,
             contactPhone,
             contactEmail,
-            shopType: shopType || 'others',
+            shopType: safeCategory,
+            slug,
+            businessHours,
             owner: userId,
             section: section._id,
             logoImage,

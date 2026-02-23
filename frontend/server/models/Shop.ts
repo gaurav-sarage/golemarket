@@ -7,7 +7,9 @@ export interface IShop extends Document {
     owner: mongoose.Types.ObjectId;
     contactEmail: string;
     contactPhone: string;
-    shopType: 'restaurant' | 'grocery' | 'clothing' | 'electronics' | 'services' | 'others';
+    shopType: 'restaurant' | 'grocery' | 'cafes' | 'salons' | 'auto' | 'general stores' | 'others';
+    slug: string;
+    businessHours?: string;
     logoImage?: string;
     bannerImage?: string;
     status: 'active' | 'inactive';
@@ -25,9 +27,11 @@ const ShopSchema: Schema = new Schema({
     contactPhone: { type: String, required: true },
     shopType: {
         type: String,
-        enum: ['restaurant', 'grocery', 'clothing', 'electronics', 'services', 'others'],
+        enum: ['restaurant', 'grocery', 'cafes', 'salons', 'auto', 'general stores', 'others'],
         required: true
     },
+    slug: { type: String, required: true, unique: true },
+    businessHours: { type: String },
     logoImage: { type: String },
     bannerImage: { type: String },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },

@@ -108,7 +108,7 @@ export const registerShopOwner = async (req: Request, res: Response): Promise<vo
 
         owner = await ShopOwner.create({ name, email, password: hashedPassword, phone, role: 'shop_owner', verificationToken });
 
-        const clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? `https://${req.get('host')}` : 'http://localhost:3000');
+        const clientUrl = process.env.MERCHANT_URL || (process.env.NODE_ENV === 'production' ? 'https://merchant-golemarket.vercel.app' : 'http://localhost:3000');
         const verifyUrl = `${clientUrl}/verify-email?token=${verificationToken}`;
         await sendEmail({
             email,
