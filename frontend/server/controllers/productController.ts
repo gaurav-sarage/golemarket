@@ -54,7 +54,8 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 
         const payload = { ...req.body };
         if (req.file) {
-            const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const b64 = Buffer.from(req.file.buffer).toString('base64');
+            const imageUrl = `data:${req.file.mimetype};base64,${b64}`;
             payload.images = [imageUrl];
         }
 

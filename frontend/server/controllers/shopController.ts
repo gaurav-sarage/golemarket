@@ -91,7 +91,8 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
 
         let logoImage = '';
         if (req.file) {
-            logoImage = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            const b64 = Buffer.from(req.file.buffer).toString('base64');
+            logoImage = `data:${req.file.mimetype};base64,${b64}`;
         }
 
         shop = await Shop.create({
