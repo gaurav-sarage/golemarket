@@ -9,7 +9,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 
 function VerifyEmailHandler() {
     const searchParams = useSearchParams();
-    const token = searchParams.get("token");
+    const token = searchParams?.get("token");
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const [message, setMessage] = useState("Verifying your email address...");
     const login = useAuthStore((state) => state.login);
