@@ -6,7 +6,7 @@ import Joi from 'joi';
 export const getShops = async (req: Request, res: Response): Promise<void> => {
     try {
         const { section, type, search } = req.query;
-        let query: any = { status: 'active' };
+        let query: any = { status: { $in: ['active', 'open', 'closed'] } };
 
         if (section) {
             const sec = await Section.findOne({ name: new RegExp('^' + section + '$', 'i') });
@@ -141,7 +141,7 @@ export const createShop = async (req: Request, res: Response): Promise<void> => 
             owner: userId,
             section: section._id,
             logoImage,
-            status: 'active'
+            status: 'closed'
         });
 
         res.status(201).json({ success: true, data: shop });
