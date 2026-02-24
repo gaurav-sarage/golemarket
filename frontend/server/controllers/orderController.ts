@@ -55,11 +55,12 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
         }
 
         // Add 5% GST and Handling Fee
-        const tax = Math.round(totalAmount * 0.05);
-        const handlingFee = 15;
-        const finalAmount = totalAmount + tax + handlingFee;
+        // const tax = Math.round(totalAmount * 0.05);
+        // const handlingFee = 15;
+        // const finalAmount = totalAmount + tax + handlingFee;
+        const finalAmount = totalAmount;
 
-        console.log(`Initialising Razorpay order for ${finalAmount} INR (including GST and Handling)`);
+        console.log(`Initialising Razorpay order for ${finalAmount} INR`);
 
         let razorpayOrder;
         try {

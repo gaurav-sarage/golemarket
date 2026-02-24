@@ -152,9 +152,10 @@ export default function Checkout() {
     };
 
     // Calculation Constants
-    const tax = Math.round(totalPrice * 0.05); // 5% GST
-    const handlingFee = 15;
-    const grandTotal = totalPrice + tax + handlingFee;
+    // const tax = Math.round(totalPrice * 0.05); // 5% GST
+    // const handlingFee = 15;
+    // const grandTotal = totalPrice + tax + handlingFee;
+    const grandTotal = totalPrice;
 
     if (shops.length === 0) {
         return (
@@ -433,17 +434,19 @@ export default function Checkout() {
                                     <span>Subtotal ({activeShop?.items.length} items)</span>
                                     <span className="text-gray-900 font-black">₹{totalPrice}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-500 font-bold">
-                                    <div className="flex items-center gap-2">
-                                        <span>GST (5%)</span>
-                                        <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 cursor-help" title="Standard Goods and Services Tax">?</div>
-                                    </div>
-                                    <span className="text-gray-900 font-black">₹{tax}</span>
-                                </div>
-                                <div className="flex justify-between text-gray-500 font-bold">
-                                    <span>Handling & Security</span>
-                                    <span className="text-gray-900 font-black">₹{handlingFee}</span>
-                                </div>
+                                { /* 
+                                 <div className="flex justify-between text-gray-500 font-bold">
+                                     <div className="flex items-center gap-2">
+                                         <span>GST (5%)</span>
+                                         <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 cursor-help" title="Standard Goods and Services Tax">?</div>
+                                     </div>
+                                     <span className="text-gray-900 font-black">₹{tax}</span>
+                                 </div>
+                                 <div className="flex justify-between text-gray-500 font-bold">
+                                     <span>Handling & Security</span>
+                                     <span className="text-gray-900 font-black">₹{handlingFee}</span>
+                                 </div>
+                                 */ }
                             </div>
 
                             <div className="pt-8 border-t-2 border-dashed border-gray-100 space-y-4">
