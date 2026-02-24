@@ -26,6 +26,10 @@ export interface IProduct extends Document {
     preparationTime?: number;
     portionSize?: string;
     stockLimitPerDay?: number;
+    spiceLevel?: 'None' | 'Mild' | 'Medium' | 'Hot' | 'Extra Hot';
+    isChefSpecial?: boolean;
+    isMustTry?: boolean;
+    isBestseller?: boolean;
 
     unitType?: string; // Piece / Pack / Box / Kg / Gram / Litre
     minimumOrderQuantity?: number;
@@ -80,6 +84,14 @@ const ProductSchema: Schema = new Schema({
     preparationTime: { type: Number },
     portionSize: { type: String },
     stockLimitPerDay: { type: Number },
+    spiceLevel: {
+        type: String,
+        enum: ['None', 'Mild', 'Medium', 'Hot', 'Extra Hot'],
+        default: 'None'
+    },
+    isChefSpecial: { type: Boolean, default: false },
+    isMustTry: { type: Boolean, default: false },
+    isBestseller: { type: Boolean, default: false },
 
     unitType: { type: String },
     minimumOrderQuantity: { type: Number },

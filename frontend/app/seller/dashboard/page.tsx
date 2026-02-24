@@ -50,7 +50,8 @@ export default function SellerDashboard() {
         serviceDuration: '', vehicleCompatibility: '', availableDays: '',
         deliveryEligibility: true, pickupAvailability: true, trackInventory: true,
         appointmentRequired: false, taxIndicator: false,
-        productStatus: 'Published', availabilityStatus: 'Available'
+        productStatus: 'Published', availabilityStatus: 'Available',
+        spiceLevel: 'None', isChefSpecial: false, isMustTry: false, isBestseller: false
     };
     const [newProduct, setNewProduct] = useState<any>(INITIAL_PRODUCT_STATE);
 
@@ -213,7 +214,11 @@ export default function SellerDashboard() {
             appointmentRequired: product.appointmentRequired ?? false,
             taxIndicator: product.taxIndicator ?? false,
             productStatus: product.productStatus || 'Published',
-            availabilityStatus: product.availabilityStatus || 'Available'
+            availabilityStatus: product.availabilityStatus || 'Available',
+            spiceLevel: product.spiceLevel || 'None',
+            isChefSpecial: product.isChefSpecial ?? false,
+            isMustTry: product.isMustTry ?? false,
+            isBestseller: product.isBestseller ?? false
         });
         setEditingProductId(product._id);
         setIsEditingProduct(true);
@@ -566,6 +571,35 @@ export default function SellerDashboard() {
                                                     <div>
                                                         <label className="block text-sm font-bold text-gray-700 mb-2">Daily Stock Limit (Opt)</label>
                                                         <input type="number" value={newProduct.stockLimitPerDay} onChange={e => setNewProduct({ ...newProduct, stockLimitPerDay: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="e.g. 50" />
+                                                    </div>
+                                                )}
+
+                                                {['restaurant', 'cafes'].includes(shop?.shopType) && (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <div>
+                                                            <label className="block text-sm font-bold text-gray-700 mb-2">Spice Level</label>
+                                                            <select value={newProduct.spiceLevel} onChange={e => setNewProduct({ ...newProduct, spiceLevel: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white">
+                                                                <option value="None">None</option>
+                                                                <option value="Mild">Mild</option>
+                                                                <option value="Medium">Medium</option>
+                                                                <option value="Hot">Hot</option>
+                                                                <option value="Extra Hot">Extra Hot</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="flex flex-col gap-3 justify-center">
+                                                            <label className="flex items-center gap-3 cursor-pointer group">
+                                                                <input type="checkbox" checked={newProduct.isMustTry} onChange={e => setNewProduct({ ...newProduct, isMustTry: e.target.checked })} className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+                                                                <span className="text-sm font-bold text-gray-700 group-hover:text-primary-600 transition-colors">Must Try</span>
+                                                            </label>
+                                                            <label className="flex items-center gap-3 cursor-pointer group">
+                                                                <input type="checkbox" checked={newProduct.isChefSpecial} onChange={e => setNewProduct({ ...newProduct, isChefSpecial: e.target.checked })} className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+                                                                <span className="text-sm font-bold text-gray-700 group-hover:text-primary-600 transition-colors">Chef's Special</span>
+                                                            </label>
+                                                            <label className="flex items-center gap-3 cursor-pointer group">
+                                                                <input type="checkbox" checked={newProduct.isBestseller} onChange={e => setNewProduct({ ...newProduct, isBestseller: e.target.checked })} className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+                                                                <span className="text-sm font-bold text-gray-700 group-hover:text-primary-600 transition-colors">Bestseller</span>
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 )}
 

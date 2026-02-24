@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import api from "../../../lib/api";
 import { motion } from "framer-motion";
-import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowLeft, ShieldCheck, Truck, Clock, Tag, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowLeft, ShieldCheck, Truck, Clock, Tag, ChevronLeft, ChevronRight, Flame, Sparkles, ThumbsUp, Award } from "lucide-react";
 import { useCartStore } from "../../../store/useCartStore";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -165,6 +165,28 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                                             'bg-yellow-50 text-yellow-600 border-yellow-100'
                                         }`}>
                                         {product.foodType}
+                                    </span>
+                                )}
+                                {product.isMustTry && (
+                                    <span className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border border-orange-200 flex items-center gap-1 shadow-sm">
+                                        <ThumbsUp className="w-3 h-3" /> Must Try
+                                    </span>
+                                )}
+                                {product.isChefSpecial && (
+                                    <span className="px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border border-purple-200 flex items-center gap-1 shadow-sm">
+                                        <Sparkles className="w-3 h-3" /> Chef's Special
+                                    </span>
+                                )}
+                                {product.isBestseller && (
+                                    <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border border-blue-200 flex items-center gap-1 shadow-sm">
+                                        <Award className="w-3 h-3" /> Bestseller
+                                    </span>
+                                )}
+                                {product.spiceLevel && product.spiceLevel !== 'None' && (
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border flex items-center gap-1 shadow-sm ${['Hot', 'Extra Hot'].includes(product.spiceLevel) ? 'bg-red-50 text-red-600 border-red-100' : 'bg-orange-50 text-orange-600 border-orange-100'
+                                        }`}>
+                                        <Flame className={`w-3 h-3 ${product.spiceLevel === 'Extra Hot' ? 'animate-pulse' : ''}`} />
+                                        {product.spiceLevel} Spice
                                     </span>
                                 )}
                             </div>

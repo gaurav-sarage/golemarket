@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import api from "../../../lib/api";
 import { motion } from "framer-motion";
-import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowUpDown, ChevronDown, Clock, AlertCircle } from "lucide-react";
+import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowUpDown, ChevronDown, Clock, AlertCircle, Sparkles } from "lucide-react";
 import { isStoreCurrentlyOpen } from "../../../lib/storeUtils";
 import Link from "next/link";
 import { useCartStore } from "../../../store/useCartStore";
@@ -246,6 +246,12 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
                                                             'bg-yellow-500'
                                                         }`} />
                                                     {product.foodType}
+                                                </div>
+                                            )}
+                                            {(product.isMustTry || product.isChefSpecial) && (
+                                                <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-primary-700 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter shadow-sm border border-primary-100 flex items-center gap-1">
+                                                    <Sparkles className="w-2.5 h-2.5 text-primary-500" />
+                                                    {product.isChefSpecial ? "Chef's Special" : "Must Try"}
                                                 </div>
                                             )}
                                         </div>
