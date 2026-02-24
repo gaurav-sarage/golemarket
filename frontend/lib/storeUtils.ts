@@ -1,5 +1,5 @@
 export const isStoreCurrentlyOpen = (shop: any) => {
-    if (!shop || shop.status !== 'open') return { isOpen: false, message: 'Store manually closed' };
+    if (!shop) return { isOpen: false, message: 'Store not found' };
 
     const now = new Date();
     // Use Indian Standard Time if possible, but for local browser it's fine

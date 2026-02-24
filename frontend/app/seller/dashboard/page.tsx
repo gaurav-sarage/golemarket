@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import StoreSettings from "../../../components/dashboard/StoreSettings";
 import ProfileSettings from "../../../components/dashboard/ProfileSettings";
 import OnboardingWelcome from "../../../components/onboarding/OnboardingWelcome";
+import { isStoreCurrentlyOpen } from "../../../lib/storeUtils";
 
 export default function SellerDashboard() {
     const { user } = useAuthStore();
@@ -318,26 +319,9 @@ export default function SellerDashboard() {
 
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
                             <div className="flex items-center justify-between gap-4 px-5 py-3 bg-black/20 rounded-2xl border border-white/10 backdrop-blur-sm">
-                                <span className={`text-xs font-black uppercase tracking-widest ${shop?.status === 'open' ? 'text-green-400' : 'text-red-400'}`}>
-                                    {shop?.status === 'open' ? 'Live Now' : 'Store Offline'}
+                                <span className={`text-xs font-black uppercase tracking-widest ${isStoreCurrentlyOpen(shop).isOpen ? 'text-green-400' : 'text-red-400'}`}>
+                                    {isStoreCurrentlyOpen(shop).message}
                                 </span>
-                                <button
-                                    onClick={async () => {
-                                        const newStatus = shop?.status === 'open' ? 'closed' : 'open';
-                                        try {
-                                            const res = await api.put(`/shops/${shop._id}`, { status: newStatus });
-                                            if (res.data.success) {
-                                                setShop({ ...shop, status: newStatus });
-                                                toast.success(`Store is now ${newStatus}`);
-                                            }
-                                        } catch (err) {
-                                            toast.error("Failed to update status");
-                                        }
-                                    }}
-                                    className={`w-12 h-6 rounded-full transition-all relative ${shop?.status === 'open' ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-gray-500'}`}
-                                >
-                                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-sm ${shop?.status === 'open' ? 'right-1' : 'left-1'}`} />
-                                </button>
                             </div>
                         </div>
                     </div>
