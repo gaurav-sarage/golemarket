@@ -54,12 +54,16 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         }
     };
 
-    const handleAddToCart = async () => {
-        const success = await addToCart(product._id, quantity);
-        if (success) {
+    const handleAddToCart = async (force: boolean = false) => {
+        const result = await addToCart(product._id, quantity, force);
+        if (result.success) {
             toast.success(`${product.name} (${quantity}) added to cart!`);
+        } else if (result.code === 'DIFFERENT_SHOP') {
+            if (window.confirm(result.message)) {
+                handleAddToCart(true);
+            }
         } else {
-            toast.error("Failed to add to cart. Please log in first.");
+            toast.error(result.message || "Failed to add to cart. Please log in first.");
         }
     };
 
@@ -262,7 +266,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                                     </button>
                                 </div>
                                 <button
-                                    onClick={handleAddToCart}
+                                    onClick={() => handleAddToCart()}
                                     disabled={product.stockQuantity === 0}
                                     className={`flex-1 py-4.5 rounded-[1.2rem] font-black text-base flex items-center justify-center gap-3 transition-all shadow-xl active:scale-95 ${product.stockQuantity === 0
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'

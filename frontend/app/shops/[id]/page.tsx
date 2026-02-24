@@ -59,14 +59,20 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
         }
     };
 
-    const handleAddToCart = async (e: React.MouseEvent, product: any) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const success = await addToCart(product._id, 1);
-        if (success) {
+    const handleAddToCart = async (e: React.MouseEvent, product: any, force: boolean = false) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const result = await addToCart(product._id, 1, force);
+        if (result.success) {
             toast.success(`${product.name} added to cart!`);
+        } else if (result.code === 'DIFFERENT_SHOP') {
+            if (window.confirm(result.message)) {
+                handleAddToCart(null as any, product, true);
+            }
         } else {
-            toast.error("Failed to add to cart. Please log in first.");
+            toast.error(result.message || "Failed to add to cart. Please log in first.");
         }
     };
 

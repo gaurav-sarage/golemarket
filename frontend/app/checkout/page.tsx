@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useCartStore } from "../../store/useCartStore";
-import { useAuthStore } from "../../store/useAuthStore";
-import api from "../../lib/api";
-import { loadRazorpayScript } from "../../lib/razorpay";
+import { useCartStore } from "@/store/useCartStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import api from "@/lib/api";
+import { loadRazorpayScript } from "@/lib/razorpay";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+import { ShoppingBag, ChevronLeft, CreditCard, ShieldCheck } from "lucide-react";
 
 export default function Checkout() {
     const { shops, totalPrice, fetchCart, clearCart } = useCartStore();
@@ -21,6 +23,9 @@ export default function Checkout() {
         country: "India",
     });
     const [isLoading, setIsLoading] = useState(false);
+
+    // Enforce single-shop logic by only taking the first shop's items
+    const activeShop = shops[0];
 
     useEffect(() => {
         fetchCart();
@@ -107,121 +112,113 @@ export default function Checkout() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
-                {/* Left side: Checkout Form */}
-                <div className="flex-1">
-                    <h2 className="text-3xl font-heading font-extrabold text-gray-900 mb-8">Checkout</h2>
+        <div className="min-h-screen bg-[#fafafa] py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-5xl mx-auto">
+                <button
+                    onClick={() => router.back()}
+                    className="flex items-center gap-2 text-gray-500 hover:text-primary-600 font-bold mb-8 transition-all group"
+                >
+                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                    Back
+                </button>
 
-                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-8">
-                        <h3 className="text-xl font-bold mb-6">Shipping Address</h3>
-                        <form onSubmit={handleCheckout} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="col-span-1 md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
-                                    <input
-                                        type="text"
-                                        name="street"
-                                        required
-                                        value={address.street}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border-gray-300 border bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                                    />
+                <div className="flex flex-col lg:flex-row gap-12">
+                    {/* Left: Checkout Summary */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex-1"
+                    >
+                        <h1 className="text-4xl font-heading font-black text-gray-900 mb-2">Checkout</h1>
+                        <p className="text-gray-500 mb-8 font-medium">Complete your order from <span className="text-gray-900 font-bold">{activeShop?.shopName || 'Store'}</span></p>
+
+                        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-8 sm:p-10 mb-8">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-12 h-12 rounded-2xl bg-primary-50 flex items-center justify-center text-primary-600">
+                                    <ShoppingBag className="w-6 h-6" />
                                 </div>
-
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-                                    <input
-                                        type="text"
-                                        name="city"
-                                        required
-                                        value={address.city}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border-gray-300 border bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                                    />
+                                    <h3 className="text-xl font-bold text-gray-900">Order Summary</h3>
+                                    <p className="text-sm font-medium text-gray-500">{activeShop?.items.length} items from this store</p>
                                 </div>
+                            </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
-                                    <input
-                                        type="text"
-                                        name="state"
-                                        required
-                                        value={address.state}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border-gray-300 border bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                                    />
+                            <div className="space-y-6 mb-10">
+                                {activeShop?.items.map((item: any) => (
+                                    <div key={item.productId._id} className="flex gap-4 items-center">
+                                        <div className="w-20 h-20 rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
+                                            <img
+                                                src={item.productId.images?.[0] || "https://via.placeholder.com/150"}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-gray-900">{item.productId.name}</h4>
+                                            <p className="text-sm font-bold text-gray-400">Qty: {item.quantity}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-black text-gray-900">₹{item.price * item.quantity}</p>
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">₹{item.price} each</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="p-6 bg-gray-50 rounded-[1.8rem] space-y-4">
+                                <div className="flex justify-between text-sm font-bold text-gray-500">
+                                    <span>Subtotal</span>
+                                    <span>₹{totalPrice}</span>
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
-                                    <input
-                                        type="text"
-                                        name="zipCode"
-                                        required
-                                        value={address.zipCode}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border-gray-300 border bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                                    />
+                                <div className="flex justify-between text-sm font-bold text-gray-500">
+                                    <span>Store Service Fee</span>
+                                    <span className="text-green-600">FREE</span>
                                 </div>
+                                <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
+                                    <span className="text-lg font-black text-gray-900">Total Amount</span>
+                                    <span className="text-3xl font-black text-primary-600">₹{totalPrice}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
-                                    <input
-                                        type="text"
-                                        name="country"
-                                        required
-                                        value={address.country}
-                                        onChange={handleChange}
-                                        disabled
-                                        className="w-full px-4 py-3 rounded-xl border-gray-300 border bg-gray-100 text-gray-500 cursor-not-allowed outline-none transition-all"
-                                    />
+                    {/* Right: Payment Action */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="w-full lg:w-[380px] shrink-0"
+                    >
+                        <div className="bg-white rounded-[2.5rem] border-2 border-primary-100 shadow-xl shadow-primary-500/5 p-8 sticky top-24">
+                            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <CreditCard className="w-5 h-5 text-primary-600" />
+                                Payment
+                            </h3>
+
+                            <div className="space-y-4 mb-8 text-sm font-medium text-gray-600 leading-relaxed">
+                                <div className="flex gap-3">
+                                    <ShieldCheck className="w-5 h-5 text-green-500 shrink-0" />
+                                    <p>Secure SSL Encrypted Payment</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <ShieldCheck className="w-5 h-5 text-green-500 shrink-0" />
+                                    <p>Direct Store Settlement</p>
                                 </div>
                             </div>
 
                             <button
-                                type="submit"
+                                onClick={handleCheckout}
                                 disabled={isLoading}
-                                className="w-full py-4 rounded-xl bg-primary-600 text-white font-bold text-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all shadow-md mt-6 flex justify-center items-center"
+                                className="w-full py-5 rounded-[1.8rem] bg-primary-600 text-white font-black text-xl hover:bg-primary-700 active:scale-95 transition-all shadow-xl shadow-primary-600/20 disabled:opacity-50 disabled:active:scale-100 mb-6"
                             >
                                 {isLoading ? "Processing..." : `Pay ₹${totalPrice}`}
                             </button>
-                        </form>
-                    </div>
-                </div>
 
-                {/* Right side: Order Summary */}
-                <div className="w-full lg:w-96 shrink-0">
-                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 sticky top-24">
-                        <h3 className="text-xl font-bold mb-6">Order Summary</h3>
-
-                        <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
-                            {shops.map((shop: any) => (
-                                <div key={shop.shopId} className="border-b pb-4 last:border-0 last:pb-0">
-                                    <h4 className="font-semibold text-gray-800 mb-3">{shop.shopName || 'Store Items'}</h4>
-                                    <ul className="space-y-4">
-                                        {shop.items.map((item: any) => (
-                                            <li key={item.productId._id} className="flex justify-between items-start gap-4 text-sm">
-                                                <div className="flex-1">
-                                                    <p className="font-medium text-gray-900">{item.productId.name}</p>
-                                                    <p className="text-gray-500 mt-1">Qty: {item.quantity}</p>
-                                                </div>
-                                                <span className="font-semibold text-gray-900">₹{item.price * item.quantity}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))}
+                            <p className="text-[11px] font-bold text-gray-400 text-center uppercase tracking-widest leading-loose">
+                                By clicking Pay, you agree to our <br />
+                                <span className="text-gray-900 underline decoration-primary-500/30">Terms and Conditions</span>
+                            </p>
                         </div>
-
-                        <div className="border-t border-gray-100 pt-6 mt-6">
-                            <div className="flex justify-between items-center text-xl font-bold">
-                                <span className="text-gray-900">Total</span>
-                                <span className="text-primary-600">₹{totalPrice}</span>
-                            </div>
-                            <p className="text-sm text-gray-500 text-right mt-2">Includes all taxes and fees</p>
-                        </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </div>

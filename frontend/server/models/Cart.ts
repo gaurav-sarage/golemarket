@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IShopCart {
     shopId: mongoose.Types.ObjectId;
+    shopName?: string;
     items: {
         productId: mongoose.Types.ObjectId;
         quantity: number;
@@ -20,6 +21,7 @@ const CartSchema: Schema = new Schema({
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
     shops: [{
         shopId: { type: Schema.Types.ObjectId, ref: 'Shop', required: true },
+        shopName: { type: String },
         items: [{
             productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
             quantity: { type: Number, required: true, min: 1 },

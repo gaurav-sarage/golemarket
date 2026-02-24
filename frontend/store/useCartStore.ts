@@ -9,6 +9,7 @@ interface CartItem {
 
 interface ShopCart {
     shopId: string;
+    shopName?: string;
     items: CartItem[];
 }
 
@@ -17,7 +18,7 @@ interface CartState {
     totalPrice: number;
     isLoading: boolean;
     fetchCart: () => Promise<void>;
-    addToCart: (productId: string, quantity: number) => Promise<boolean>;
+    addToCart: (productId: string, quantity: number, force?: boolean) => Promise<any>;
     removeFromCart: (productId: string) => Promise<void>;
     clearCart: () => void;
 }
@@ -40,18 +41,18 @@ export const useCartStore = create<CartState>((set) => ({
         }
     },
 
-    addToCart: async (productId: string, quantity: number) => {
+    addToCart: async (productId: string, quantity: number, force: boolean = false) => {
         try {
             set({ isLoading: true });
-            const { data } = await api.post('/cart/add', { productId, quantity });
+            const { data } = await api.post('/cart/add', { productId, quantity, force });
             if (data.success) {
                 set({ shops: data.data.shops, totalPrice: data.data.totalPrice, isLoading: false });
-                return true;
+                return { success: true };
             }
-            return false;
-        } catch (err) {
+            return data;
+        } catch (err: any) {
             set({ isLoading: false });
-            return false;
+            return err.response?.data || { success: false, message: 'Failed to add to cart' };
         }
     },
 
