@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import StoreSettings from "../../../components/dashboard/StoreSettings";
 import ProfileSettings from "../../../components/dashboard/ProfileSettings";
+import OnboardingWelcome from "../../../components/onboarding/OnboardingWelcome";
 
 export default function SellerDashboard() {
     const { user } = useAuthStore();
@@ -18,6 +19,14 @@ export default function SellerDashboard() {
     const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders' | 'settings' | 'profile'>('analytics');
     const [isLoading, setIsLoading] = useState(false);
     const [needsSetup, setNeedsSetup] = useState(false);
+    const [showOnboarding, setShowOnboarding] = useState(false);
+
+    useEffect(() => {
+        const hasVisited = localStorage.getItem('onboarding_seller_completed');
+        if (!hasVisited && !needsSetup) {
+            setShowOnboarding(true);
+        }
+    }, [needsSetup]);
 
     const { isAuthenticated, isLoading: isAuthLoading, checkAuth } = useAuthStore();
     const router = useRouter();
@@ -874,6 +883,17 @@ export default function SellerDashboard() {
                     <ProfileSettings user={user} onUpdate={checkAuth} />
                 )}
             </div>
+
+            {showOnboarding && (
+                <OnboardingWelcome
+                    type="seller"
+                    name={user?.name || 'Partner'}
+                    onComplete={() => {
+                        setShowOnboarding(false);
+                        localStorage.setItem('onboarding_seller_completed', 'true');
+                    }}
+                />
+            )}
         </div>
     );
 }

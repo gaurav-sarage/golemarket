@@ -3,7 +3,9 @@
 import { motion } from "framer-motion";
 import { ArrowRight, ShoppingBag, Utensils, Zap, Laptop, Scissors, Store, Coffee, Car, ShieldCheck, Clock, CheckCircle, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Link from "next/link";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import OnboardingWelcome from "../components/onboarding/OnboardingWelcome";
 
 const CATEGORIES = [
   { id: "restaurants", name: "Restaurants", icon: Utensils, color: "bg-red-100 text-red-600" },
@@ -32,6 +34,17 @@ const FEATURED_SHOPS = [
 
 export default function Home() {
   const carouselRef = useRef<HTMLDivElement>(null);
+  const { user, isAuthenticated } = useAuthStore();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'customer') {
+      const hasVisited = localStorage.getItem('onboarding_customer_completed');
+      if (!hasVisited) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [isAuthenticated, user]);
 
   const scrollLeft = () => {
     if (carouselRef.current) {
@@ -169,7 +182,16 @@ export default function Home() {
         </div>
       </section>
 
-
+      {showOnboarding && (
+        <OnboardingWelcome
+          type="customer"
+          name={user?.name || 'Shopper'}
+          onComplete={() => {
+            setShowOnboarding(false);
+            localStorage.setItem('onboarding_customer_completed', 'true');
+          }}
+        />
+      )}
     </div>
   );
 }
