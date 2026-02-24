@@ -61,10 +61,12 @@ export default function Checkout() {
     };
 
     const validateShipping = () => {
+        /*
         if (!address.street || !address.city || !address.state || !address.zipCode) {
             toast.error("Please fill in all address details");
             return false;
         }
+        */
         if (!contact.phone) {
             toast.error("Please provide a contact number");
             return false;
@@ -92,7 +94,13 @@ export default function Checkout() {
             }
 
             const { data } = await api.post("/orders/checkout", {
-                shippingAddress: address,
+                shippingAddress: address.street ? address : {
+                    street: "Not Provided",
+                    city: "Not Provided",
+                    state: "Not Provided",
+                    zipCode: "000000",
+                    country: "India"
+                },
                 phoneNumber: contact.phone
             });
 
@@ -244,7 +252,7 @@ export default function Checkout() {
                                         </div>
                                     </div>
 
-                                    {/* Address Section */}
+                                    {/* Address Section - Commented Out
                                     <div className="bg-white rounded-[2.5rem] border border-gray-100 p-8 sm:p-10 shadow-sm">
                                         <div className="flex items-center gap-4 mb-8">
                                             <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600">
@@ -300,6 +308,7 @@ export default function Checkout() {
                                             </div>
                                         </div>
                                     </div>
+                                    */}
 
                                     <button
                                         onClick={nextStep}
