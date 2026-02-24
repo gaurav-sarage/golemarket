@@ -42,6 +42,7 @@ export interface IOrder extends Document {
     paymentId?: mongoose.Types.ObjectId;
     totalAmount: number;
     status: 'Pending' | 'Paid' | 'Failed';
+    phoneNumber: string;
     shippingAddress: {
         street: string;
         city: string;
@@ -58,6 +59,7 @@ const OrderSchema: Schema = new Schema({
     paymentId: { type: Schema.Types.ObjectId, ref: 'Payment' },
     totalAmount: { type: Number, required: true },
     status: { type: String, enum: ['Pending', 'Paid', 'Failed'], default: 'Pending' },
+    phoneNumber: { type: String, required: true },
     shippingAddress: {
         street: { type: String, required: true },
         city: { type: String, required: true },

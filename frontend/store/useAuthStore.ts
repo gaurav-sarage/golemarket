@@ -7,6 +7,14 @@ interface User {
     name: string;
     email: string;
     role: 'customer' | 'shop_owner' | 'admin';
+    phone?: string;
+    address?: {
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+        country: string;
+    };
 }
 
 interface AuthState {

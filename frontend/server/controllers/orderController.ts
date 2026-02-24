@@ -15,7 +15,7 @@ const razorpay = new Razorpay({
 export const checkout = async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = (req as any).user.id;
-        const { shippingAddress } = req.body;
+        const { shippingAddress, phoneNumber } = req.body;
 
         const cart = await Cart.findOne({ userId }).populate('shops.items.productId');
         if (!cart || cart.shops.length === 0) {
@@ -24,29 +24,33 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
         }
 
         let totalAmount = 0;
-        const itemsData = [];
-
         for (const shop of cart.shops) {
             for (const item of shop.items) {
                 const product = await Product.findById(item.productId);
                 if (!product || product.stockQuantity < item.quantity) {
-                    throw new Error(`Product ${product?.name || item.productId} is out of stock or insufficient quantity`);
+                    throw new Error(`Product ${product?.name || item.productId} is out of stock`);
                 }
                 totalAmount += item.quantity * item.price;
             }
         }
 
+        // Add 5% GST and Handling Fee to match frontend grandTotal
+        const tax = Math.round(totalAmount * 0.05);
+        const handlingFee = 15;
+        const finalAmount = totalAmount + tax + handlingFee;
+
         const razorpayOrder = await razorpay.orders.create({
-            amount: totalAmount * 100, // paise
+            amount: finalAmount * 100, // paise
             currency: 'INR',
             receipt: `receipt_${Date.now()}`
         });
 
         const [order] = await Order.create([{
             userId,
-            totalAmount,
+            totalAmount: finalAmount,
             status: 'Pending',
-            shippingAddress
+            shippingAddress,
+            phoneNumber
         }]);
 
         const shopOrders = [];
