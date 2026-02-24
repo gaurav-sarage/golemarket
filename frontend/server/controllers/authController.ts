@@ -60,7 +60,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
         user = await User.create({ name, email, password: hashedPassword, phone, role: 'customer', verificationToken });
 
-        const clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? `https://${req.get('host')}` : 'http://localhost:3000');
+        const clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://golemarket.vercel.app' : 'http://localhost:3000');
         const verifyUrl = `${clientUrl}/verify-email?token=${verificationToken}`;
         await sendEmail({
             email,
@@ -238,30 +238,40 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         let user = await User.findOne({ email });
         let owner = await ShopOwner.findOne({ email });
 
-        const account = user || owner;
-        if (!account) {
+        if (!user && !owner) {
             res.status(404).json({ success: false, message: 'There is no user with that email' });
             return;
         }
 
-        const resetToken = crypto.randomBytes(20).toString('hex');
-        account.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        account.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000) as any; // 10 minutes
-        await account.save({ validateBeforeSave: false });
+        // Determine if this is a merchant or customer based on found accounts
+        // Prioritize merchant if it exists to avoid sending them to customer portal
+        const isMerchant = !!owner;
+        const account = owner || user;
 
-        const clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? `https://${req.get('host')}` : 'http://localhost:3000');
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        account!.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        account!.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000) as any; // 10 minutes
+        await account!.save({ validateBeforeSave: false });
+
+        let clientUrl;
+        if (isMerchant) {
+            clientUrl = process.env.MERCHANT_URL || (process.env.NODE_ENV === 'production' ? 'https://merchant-golemarket.vercel.app' : 'http://localhost:3000');
+        } else {
+            clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://golemarket.vercel.app' : 'http://localhost:3000');
+        }
+
         const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
         try {
             await sendEmail({
-                email: account.email,
+                email: account!.email,
                 subject: 'Password Reset Request',
                 message: `<p>You are receiving this email because you (or someone else) has requested the reset of a password. Please click the link below to reset your password:\n\n <a href="${resetUrl}">${resetUrl}</a></p>`
             });
             res.status(200).json({ success: true, message: 'Email sent successfully' });
         } catch (err) {
-            account.resetPasswordToken = undefined;
-            account.resetPasswordExpire = undefined;
-            await account.save({ validateBeforeSave: false });
+            account!.resetPasswordToken = undefined;
+            account!.resetPasswordExpire = undefined;
+            await account!.save({ validateBeforeSave: false });
             res.status(500).json({ success: false, message: 'Email could not be sent' });
         }
     } catch (err: any) {

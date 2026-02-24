@@ -34,10 +34,15 @@ function ResetPasswordForm() {
         setIsLoading(true);
 
         try {
-            await api.put(`/auth/reset-password/${token}`, { password });
+            const { data } = await api.put(`/auth/reset-password/${token}`, { password });
             toast.success("Password reset successfully! You can now login.");
+
             setTimeout(() => {
-                router.push("/login");
+                if (data.user?.role === 'shop_owner') {
+                    router.push("/seller/login");
+                } else {
+                    router.push("/login");
+                }
             }, 2000);
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Failed to reset password");
