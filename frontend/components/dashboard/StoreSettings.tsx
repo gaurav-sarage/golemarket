@@ -10,14 +10,61 @@ interface StoreSettingsProps {
     onUpdate: (shop: any) => void;
 }
 
+const TimePicker = ({ value, onChange, disabled }: { value: string, onChange: (val: string) => void, disabled?: boolean }) => {
+    // value format: "09:00 AM"
+    const parts = value.split(/[: ]/);
+    const h = parts[0] || "09";
+    const m = parts[1] || "00";
+    const p = parts[2] || "AM";
+
+    return (
+        <div className={`flex gap-1 items-center ${disabled ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+            <select
+                value={h}
+                onChange={(e) => onChange(`${e.target.value}:${m} ${p}`)}
+                className="bg-gray-100/50 border border-gray-200 rounded-lg py-1.5 px-2 text-xs font-bold outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+            >
+                {Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(val => (
+                    <option key={val} value={val}>{val}</option>
+                ))}
+            </select>
+            <span className="text-gray-400 font-bold">:</span>
+            <select
+                value={m}
+                onChange={(e) => onChange(`${h}:${e.target.value} ${p}`)}
+                className="bg-gray-100/50 border border-gray-200 rounded-lg py-1.5 px-2 text-xs font-bold outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+            >
+                {['00', '15', '30', '45'].map(val => (
+                    <option key={val} value={val}>{val}</option>
+                ))}
+            </select>
+            <select
+                value={p}
+                onChange={(e) => onChange(`${h}:${m} ${e.target.value}`)}
+                className="bg-gray-100/50 border border-gray-200 rounded-lg py-1.5 px-2 text-xs font-bold outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+            >
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+            </select>
+        </div>
+    );
+};
+
 export default function StoreSettings({ shop, onUpdate }: StoreSettingsProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
     const [form, setForm] = useState({
         name: shop?.name || "",
         description: shop?.description || "",
         contactEmail: shop?.contactEmail || "",
         contactPhone: shop?.contactPhone || "",
-        businessHours: shop?.businessHours || "",
+        businessHours: shop?.businessHours?.length === 7 ? shop.businessHours : DAYS.map(day => ({
+            day,
+            open: "09:00 AM",
+            close: "10:00 PM",
+            isClosed: false
+        })),
         deliveryType: shop?.deliveryType || "both",
         minimumOrderAmount: shop?.minimumOrderAmount || 0,
         deliveryCharges: shop?.deliveryCharges || 0,
@@ -48,7 +95,7 @@ export default function StoreSettings({ shop, onUpdate }: StoreSettingsProps) {
             formData.append('description', form.description);
             formData.append('contactEmail', form.contactEmail);
             formData.append('contactPhone', form.contactPhone);
-            formData.append('businessHours', form.businessHours);
+            formData.append('businessHours', JSON.stringify(form.businessHours));
             formData.append('deliveryType', form.deliveryType);
             formData.append('minimumOrderAmount', String(form.minimumOrderAmount));
             formData.append('deliveryCharges', String(form.deliveryCharges));
@@ -176,17 +223,63 @@ export default function StoreSettings({ shop, onUpdate }: StoreSettingsProps) {
                                 <input required type="tel" value={form.contactPhone} onChange={e => setForm({ ...form, contactPhone: e.target.value })} className="w-full pl-10 border-gray-200 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50/50" />
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Business Hours</label>
-                            <div className="relative">
-                                <Clock className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
-                                <input required type="text" value={form.businessHours} onChange={e => setForm({ ...form, businessHours: e.target.value })} className="w-full pl-10 border-gray-200 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50/50" placeholder="e.g. 9:00 AM - 10:00 PM" />
+
+                        <div className="pt-4 border-t border-gray-100">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-4">Business Hours (Weekly Schedule)</label>
+                            <div className="space-y-3 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                                {form.businessHours.map((schedule: any, index: number) => (
+                                    <div key={schedule.day} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+                                        <div className="flex items-center gap-3 min-w-[100px]">
+                                            <div className={`w-2 h-2 rounded-full ${schedule.isClosed ? 'bg-red-400' : 'bg-primary-400'}`} />
+                                            <span className="text-[13px] font-bold text-gray-700">{schedule.day.substring(0, 3)}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-4 flex-1 justify-end">
+                                            <div className="flex items-center gap-2">
+                                                <TimePicker
+                                                    value={schedule.open}
+                                                    disabled={schedule.isClosed}
+                                                    onChange={(val) => {
+                                                        const newHours = [...form.businessHours];
+                                                        newHours[index].open = val;
+                                                        setForm({ ...form, businessHours: newHours });
+                                                    }}
+                                                />
+                                                <span className="text-gray-400 text-[10px] font-bold">to</span>
+                                                <TimePicker
+                                                    value={schedule.close}
+                                                    disabled={schedule.isClosed}
+                                                    onChange={(val) => {
+                                                        const newHours = [...form.businessHours];
+                                                        newHours[index].close = val;
+                                                        setForm({ ...form, businessHours: newHours });
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newHours = [...form.businessHours];
+                                                    newHours[index].isClosed = !newHours[index].isClosed;
+                                                    setForm({ ...form, businessHours: newHours });
+                                                }}
+                                                className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all min-w-[50px] ${schedule.isClosed
+                                                        ? 'bg-red-50 text-red-600 border border-red-100'
+                                                        : 'bg-green-50 text-green-600 border border-green-100'
+                                                    }`}
+                                            >
+                                                {schedule.isClosed ? 'Closed' : 'Open'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 h-fit">
                     <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                         <MapPin className="w-5 h-5 text-primary-500" /> Store Location
                     </h3>

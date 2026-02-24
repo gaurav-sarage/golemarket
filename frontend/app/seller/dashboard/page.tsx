@@ -298,7 +298,7 @@ export default function SellerDashboard() {
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Small Sidebar / Topbar for navigation */}
             <div className="bg-secondary-600 text-white shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div>
                         <h1 className="text-2xl font-bold font-heading">{shop?.name || 'Seller Dashboard'}</h1>
                         <p className="text-secondary-100 flex items-center gap-2 mt-1">

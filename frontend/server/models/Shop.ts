@@ -9,7 +9,12 @@ export interface IShop extends Document {
     contactPhone: string;
     shopType: 'restaurant' | 'grocery' | 'cafes' | 'salons' | 'auto' | 'general stores' | 'others';
     slug: string;
-    businessHours?: string;
+    businessHours: {
+        day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+        open: string;
+        close: string;
+        isClosed: boolean;
+    }[];
     logoImage?: string;
     bannerImage?: string;
     status: 'active' | 'inactive' | 'open' | 'closed';
@@ -46,7 +51,12 @@ const ShopSchema: Schema = new Schema({
         required: true
     },
     slug: { type: String, required: true, unique: true },
-    businessHours: { type: String },
+    businessHours: [{
+        day: { type: String, enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], required: true },
+        open: { type: String, default: '09:00 AM' },
+        close: { type: String, default: '10:00 PM' },
+        isClosed: { type: Boolean, default: false }
+    }],
     logoImage: { type: String },
     bannerImage: { type: String },
     status: { type: String, enum: ['active', 'inactive', 'open', 'closed'], default: 'open' },

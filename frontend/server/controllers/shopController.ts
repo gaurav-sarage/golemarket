@@ -83,6 +83,11 @@ export const updateShopProfile = async (req: Request, res: Response): Promise<vo
             updates.section = section._id;
         }
 
+        // Parse JSON strings from FormData
+        if (typeof updates.businessHours === 'string') updates.businessHours = JSON.parse(updates.businessHours);
+        if (typeof updates.address === 'string') updates.address = JSON.parse(updates.address);
+        if (typeof updates.policies === 'string') updates.policies = JSON.parse(updates.policies);
+
         shop = await Shop.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
         res.status(200).json({ success: true, data: shop });
     } catch (err: any) {

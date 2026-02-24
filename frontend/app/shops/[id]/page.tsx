@@ -3,7 +3,8 @@
 import { useEffect, useState, use } from "react";
 import api from "../../../lib/api";
 import { motion } from "framer-motion";
-import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowUpDown, ChevronDown } from "lucide-react";
+import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowUpDown, ChevronDown, Clock, AlertCircle } from "lucide-react";
+import { isStoreCurrentlyOpen } from "../../../lib/storeUtils";
 import Link from "next/link";
 import { useCartStore } from "../../../store/useCartStore";
 import toast from "react-hot-toast";
@@ -90,8 +91,16 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
         );
     }
 
+    const storeStatus = isStoreCurrentlyOpen(shop);
+
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className={`min-h-screen bg-gray-50 pb-20 ${!storeStatus.isOpen ? 'grayscale-[0.3]' : ''}`}>
+            {!storeStatus.isOpen && (
+                <div className="bg-red-600 text-white py-3 px-4 text-center font-bold flex items-center justify-center gap-3 sticky top-16 z-50 animate-pulse shadow-lg">
+                    <AlertCircle className="w-5 h-5" />
+                    <span>Store is Currently Closed. {storeStatus.message}</span>
+                </div>
+            )}
             {/* Shop Info Banner */}
             <div className="bg-white border-b border-gray-200 shadow-sm relative overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-10 blur-xl">
@@ -216,12 +225,12 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
                                             )}
                                             {product.foodType && product.foodType !== 'Not Applicable' && (
                                                 <div className={`absolute top-3 right-3 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1 ${product.foodType === 'Veg' ? 'bg-green-100 text-green-700 border border-green-200' :
-                                                        product.foodType === 'Non-Veg' ? 'bg-red-100 text-red-700 border border-red-200' :
-                                                            'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                                                    product.foodType === 'Non-Veg' ? 'bg-red-100 text-red-700 border border-red-200' :
+                                                        'bg-yellow-100 text-yellow-700 border border-yellow-200'
                                                     }`}>
                                                     <div className={`w-2 h-2 rounded-full ${product.foodType === 'Veg' ? 'bg-green-500' :
-                                                            product.foodType === 'Non-Veg' ? 'bg-red-500' :
-                                                                'bg-yellow-500'
+                                                        product.foodType === 'Non-Veg' ? 'bg-red-500' :
+                                                            'bg-yellow-500'
                                                         }`} />
                                                     {product.foodType}
                                                 </div>
@@ -243,14 +252,14 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
 
                                             <button
                                                 onClick={(e) => handleAddToCart(e, product)}
-                                                disabled={product.stockQuantity === 0}
-                                                className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${product.stockQuantity === 0
+                                                disabled={product.stockQuantity === 0 || !storeStatus.isOpen}
+                                                className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm ${product.stockQuantity === 0 || !storeStatus.isOpen
                                                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                     : 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-md'
                                                     }`}
                                             >
                                                 <ShoppingCart className="w-5 h-5" />
-                                                {product.stockQuantity === 0 ? "Out of Stock" : "Add to Cart"}
+                                                {product.stockQuantity === 0 ? "Out of Stock" : !storeStatus.isOpen ? "Store Closed" : "Add to Cart"}
                                             </button>
                                         </div>
                                     </motion.div>
