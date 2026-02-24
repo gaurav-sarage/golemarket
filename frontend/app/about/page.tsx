@@ -101,12 +101,9 @@ export default function AboutUs() {
                     className="mt-20 sm:mt-32 text-center"
                 >
                     <h2 className="text-3xl sm:text-4xl font-heading font-extrabold text-slate-900 mb-8">Ready to join the local revolution?</h2>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div className="flex justify-center">
                         <Link href="/shops" className="inline-flex px-8 py-4 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 hover:shadow-lg transition-all active:scale-95 text-lg justify-center items-center">
                             Start Shopping
-                        </Link>
-                        <Link href="/seller/register" className="inline-flex px-8 py-4 bg-white text-slate-900 border-2 border-slate-200 font-bold rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all active:scale-95 text-lg justify-center items-center">
-                            Become a Partner
                         </Link>
                     </div>
                 </motion.div>
