@@ -18,8 +18,8 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
     const [shop, setShop] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
     const { addToCart } = useCartStore();
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         fetchProductDetails();
@@ -54,9 +54,9 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
     };
 
     const handleAddToCart = async () => {
-        const success = await addToCart(product._id, 1);
+        const success = await addToCart(product._id, quantity);
         if (success) {
-            toast.success(`${product.name} added to cart!`);
+            toast.success(`${product.name} (${quantity}) added to cart!`);
         } else {
             toast.error("Failed to add to cart. Please log in first.");
         }
@@ -121,12 +121,15 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                     >
                         <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-8 sm:p-10 flex-1">
                             <div className="flex flex-wrap gap-2 mb-4">
-                                <span className="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-xs font-bold uppercase tracking-wider">
+                                <span className="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-xs font-bold uppercase tracking-wider border border-primary-100/50">
                                     {product.categoryName || 'General'}
                                 </span>
-                                {product.foodCategory && (
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${product.foodCategory === 'Veg' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-                                        {product.foodCategory}
+                                {product.foodType && product.foodType !== 'Not Applicable' && (
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.15em] border ${product.foodType === 'Veg' ? 'bg-green-50 text-green-600 border-green-100' :
+                                        product.foodType === 'Non-Veg' ? 'bg-red-50 text-red-600 border-red-100' :
+                                            'bg-yellow-50 text-yellow-600 border-yellow-100'
+                                        }`}>
+                                        {product.foodType}
                                     </span>
                                 )}
                             </div>
@@ -189,54 +192,41 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                                 )}
                             </div>
 
-                            <button
-                                onClick={handleAddToCart}
-                                disabled={product.stockQuantity === 0}
-                                className={`w-full py-5 rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 transition-all shadow-xl shadow-primary-500/10 active:scale-95 ${product.stockQuantity === 0
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
-                                    : 'bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-1'
-                                    }`}
-                            >
-                                <ShoppingCart className="w-6 h-6" />
-                                {product.stockQuantity === 0 ? "Currently Unavailable" : "Add to Shopping Bag"}
-                            </button>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8">
+                                <div className="flex items-center bg-gray-100 rounded-2xl p-1.5 border border-gray-200 transition-all focus-within:border-primary-500">
+                                    <button
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-primary-600 hover:bg-white rounded-xl transition-all font-black text-xl"
+                                    >
+                                        -
+                                    </button>
+                                    <input
+                                        type="number"
+                                        value={quantity}
+                                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                        className="w-12 text-center bg-transparent font-black text-gray-900 outline-none"
+                                    />
+                                    <button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-primary-600 hover:bg-white rounded-xl transition-all font-black text-xl"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={product.stockQuantity === 0}
+                                    className={`flex-1 py-4.5 rounded-[1.2rem] font-black text-base flex items-center justify-center gap-3 transition-all shadow-xl active:scale-95 ${product.stockQuantity === 0
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
+                                        : 'bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-1 shadow-primary-500/20'
+                                        }`}
+                                >
+                                    <ShoppingCart className="w-5 h-5" />
+                                    {product.stockQuantity === 0 ? "OUT OF STOCK" : "ADD TO CART"}
+                                </button>
+                            </div>
                         </div>
 
-                        {/* Shop Info Card */}
-                        {shop && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="mt-6 bg-secondary-900 text-white rounded-[2rem] p-6 flex items-center gap-4 group cursor-pointer overflow-hidden relative shadow-lg"
-                                onClick={() => router.push(`/shops/${shop._id}`)}
-                            >
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-800 rounded-full blur-3xl opacity-50 group-hover:scale-150 transition-transform duration-700 -translate-y-1/2 translate-x-1/2" />
-
-                                <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 overflow-hidden shrink-0 relative z-10">
-                                    <img
-                                        src={shop.logoImage || `https://via.placeholder.com/100?text=${shop.name[0]}`}
-                                        alt={shop.name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div className="flex-1 relative z-10">
-                                    <p className="text-xs font-bold text-secondary-400 uppercase tracking-widest mb-0.5">Sold & Shipped By</p>
-                                    <h4 className="text-xl font-bold group-hover:text-secondary-400 transition-colors">{shop.name}</h4>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <div className="flex">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star key={i} className={`w-3 h-3 ${i < Math.floor(shop.rating) ? 'text-secondary-400 fill-secondary-400' : 'text-gray-600'}`} />
-                                            ))}
-                                        </div>
-                                        <span className="text-xs font-bold text-gray-400">{shop.rating.toFixed(1)} Shop Rating</span>
-                                    </div>
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white group-hover:bg-secondary-600 transition-all relative z-10">
-                                    <ArrowLeft className="w-5 h-5 rotate-180" />
-                                </div>
-                            </motion.div>
-                        )}
                     </motion.div>
                 </div>
             </div>
