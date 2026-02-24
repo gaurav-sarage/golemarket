@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, Star, Clock } from "lucide-react";
 import { isStoreCurrentlyOpen } from "../../lib/storeUtils";
+import toast from "react-hot-toast";
 
 function ShopsListingContent() {
     const searchParams = useSearchParams();
@@ -139,12 +140,22 @@ function ShopsListingContent() {
                                             </p>
                                         )}
                                     </div>
-                                    <Link
-                                        href={`/shops/${shop._id}`}
-                                        className={`mt-6 w-full flex justify-between items-center py-2.5 px-4 rounded-xl font-semibold transition-all ${!storeStatus.isOpen ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-primary-50 text-primary-700 hover:bg-primary-600 hover:text-white'}`}
+                                    <div
+                                        onClick={() => !storeStatus.isOpen && toast.error(`Store is ${storeStatus.message}`)}
+                                        className={`mt-6 w-full flex justify-between items-center py-2.5 px-4 rounded-xl font-semibold transition-all ${!storeStatus.isOpen ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-primary-50 text-primary-700 hover:bg-primary-600 hover:text-white cursor-pointer'}`}
                                     >
-                                        {storeStatus.isOpen ? 'Enter Shop' : 'View Menu'} <ArrowRight className="w-4 h-4" />
-                                    </Link>
+                                        {storeStatus.isOpen ? (
+                                            <>Enter Shop <ArrowRight className="w-4 h-4" /></>
+                                        ) : (
+                                            <>Closed <Clock className="w-4 h-4" /></>
+                                        )}
+                                    </div>
+                                    {storeStatus.isOpen && (
+                                        <Link
+                                            href={`/shops/${shop._id}`}
+                                            className="absolute inset-0 z-10"
+                                        />
+                                    )}
                                 </div>
                             </motion.div>
                         );

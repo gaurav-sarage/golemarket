@@ -8,10 +8,13 @@ import { isStoreCurrentlyOpen } from "../../../lib/storeUtils";
 import Link from "next/link";
 import { useCartStore } from "../../../store/useCartStore";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { useEffect as useClientEffect } from "react";
 
 export default function ShopDetails({ params }: { params: Promise<{ id: string }> }) {
     const unwrappedParams = use(params);
     const { id } = unwrappedParams;
+    const router = useRouter();
 
     const [shop, setShop] = useState<any>(null);
     const [products, setProducts] = useState<any[]>([]);
@@ -25,6 +28,16 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
         fetchShopDetails();
         fetchShopProducts();
     }, [id]);
+
+    useEffect(() => {
+        if (shop) {
+            const storeStatus = isStoreCurrentlyOpen(shop);
+            if (!storeStatus.isOpen) {
+                toast.error(`Store is currently closed: ${storeStatus.message}`);
+                router.push("/shops");
+            }
+        }
+    }, [shop, router]);
 
     const fetchShopDetails = async () => {
         try {
