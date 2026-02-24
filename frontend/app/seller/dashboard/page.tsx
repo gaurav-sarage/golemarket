@@ -33,7 +33,7 @@ export default function SellerDashboard() {
 
     // Setup shop state
     const [shopForm, setShopForm] = useState({
-        name: '', description: '', contactPhone: '', contactEmail: '', category: 'restaurants', businessHours: ''
+        name: '', description: '', contactPhone: '', contactEmail: '', category: 'restaurants'
     });
     const [shopLogoFile, setShopLogoFile] = useState<File | null>(null);
 
@@ -110,7 +110,6 @@ export default function SellerDashboard() {
             formData.append('contactPhone', shopForm.contactPhone);
             formData.append('contactEmail', shopForm.contactEmail);
             formData.append('category', shopForm.category);
-            formData.append('businessHours', shopForm.businessHours);
 
             const slug = shopForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
             formData.append('slug', slug);
@@ -268,10 +267,6 @@ export default function SellerDashboard() {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
                             <input required type="tel" value={shopForm.contactPhone} onChange={e => setShopForm({ ...shopForm, contactPhone: e.target.value })} className="w-full border-gray-300 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-gray-50 focus:bg-white" placeholder="+91 98765 43210" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Business Hours</label>
-                            <input type="text" value={shopForm.businessHours} onChange={e => setShopForm({ ...shopForm, businessHours: e.target.value })} className="w-full border-gray-300 rounded-xl p-3 border outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-gray-50 focus:bg-white" placeholder="e.g., 9 AM - 8 PM" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Brand Logo (Optional)</label>

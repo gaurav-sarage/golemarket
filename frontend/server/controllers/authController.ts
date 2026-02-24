@@ -6,6 +6,7 @@ import { User } from '../models/User';
 import { ShopOwner } from '../models/ShopOwner';
 import Joi from 'joi';
 import sendEmail from '../utils/sendEmail';
+import { getOnboardingEmailTemplate } from '../utils/emailTemplates';
 
 const generateToken = (id: string, role: string) => {
     return jwt.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
@@ -62,10 +63,11 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
         const clientUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://golemarket.vercel.app' : 'http://localhost:3000');
         const verifyUrl = `${clientUrl}/verify-email?token=${verificationToken}`;
+
         await sendEmail({
             email,
-            subject: 'Email Verification - Gole Market Hub',
-            message: `<h1>Welcome to Gole Market!</h1><p>Please click on the link below to verify your email address and activate your account:</p><a href="${verifyUrl}">${verifyUrl}</a>`
+            subject: 'Welcome to Gole Market Hub - Verify Your Account',
+            message: getOnboardingEmailTemplate(name, 'customer', verifyUrl)
         });
 
         res.status(201).json({ success: true, message: 'Registration successful! Please check your email to verify your account.' });
@@ -110,10 +112,11 @@ export const registerShopOwner = async (req: Request, res: Response): Promise<vo
 
         const clientUrl = process.env.MERCHANT_URL || (process.env.NODE_ENV === 'production' ? 'https://merchant-golemarket.vercel.app' : 'http://localhost:3000');
         const verifyUrl = `${clientUrl}/verify-email?token=${verificationToken}`;
+
         await sendEmail({
             email,
-            subject: 'Seller Account Verification - Gole Market Hub',
-            message: `<h1>Welcome to Gole Market!</h1><p>Please click on the link below to verify your email address and activate your Seller account:</p><a href="${verifyUrl}">${verifyUrl}</a>`
+            subject: 'Partner Onboarding - Activate Your Gole Market Shop',
+            message: getOnboardingEmailTemplate(name, 'seller', verifyUrl)
         });
 
         res.status(201).json({ success: true, message: 'Registration successful! Please check your email to verify your account.' });
