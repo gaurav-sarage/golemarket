@@ -260,7 +260,7 @@ export default function Checkout() {
                                                     className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-primary-500/20 focus:ring-4 focus:ring-primary-500/5 transition-all outline-none font-bold"
                                                 />
                                             </div>
-                                            <div className="grid grid-cols-2 gap-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 <div>
                                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">City</label>
                                                     <input
@@ -268,6 +268,18 @@ export default function Checkout() {
                                                         name="city"
                                                         value={address.city}
                                                         onChange={handleAddressChange}
+                                                        placeholder="Mumbai"
+                                                        className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-primary-500/20 focus:ring-4 focus:ring-primary-500/5 transition-all outline-none font-bold"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">State</label>
+                                                    <input
+                                                        type="text"
+                                                        name="state"
+                                                        value={address.state}
+                                                        onChange={handleAddressChange}
+                                                        placeholder="Maharashtra"
                                                         className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-primary-500/20 focus:ring-4 focus:ring-primary-500/5 transition-all outline-none font-bold"
                                                     />
                                                 </div>
@@ -278,6 +290,7 @@ export default function Checkout() {
                                                         name="zipCode"
                                                         value={address.zipCode}
                                                         onChange={handleAddressChange}
+                                                        placeholder="400001"
                                                         className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-primary-500/20 focus:ring-4 focus:ring-primary-500/5 transition-all outline-none font-bold"
                                                     />
                                                 </div>
@@ -478,8 +491,8 @@ function StepIndicator({ current, target, label, icon: Icon }: { current: Checko
     return (
         <div className="flex flex-col items-center gap-1.5 px-3 py-1">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 text-white shadow-lg shadow-green-200' :
-                    isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-200' :
-                        'bg-gray-50 text-gray-300'
+                isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-200' :
+                    'bg-gray-50 text-gray-300'
                 }`}>
                 {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <Icon className="w-5 h-5" />}
             </div>
