@@ -301,70 +301,65 @@ export default function SellerDashboard() {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Small Sidebar / Topbar for navigation */}
-            <div className="bg-secondary-600 text-white shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold font-heading">{shop?.name || 'Seller Dashboard'}</h1>
-                        <p className="text-secondary-100 flex items-center gap-2 mt-1">
-                            Welcome back, {user?.name}
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2 p-1 bg-secondary-700/50 rounded-xl overflow-hidden backdrop-blur-sm">
-                        <button
-                            onClick={() => setActiveTab('analytics')}
-                            className={`px-4 py-2 font-medium rounded-lg transition-all ${activeTab === 'analytics' ? 'bg-white text-secondary-600 shadow-sm' : 'text-secondary-100 hover:text-white hover:bg-white/10'}`}
-                        >
-                            Overview
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('products')}
-                            className={`px-4 py-2 font-medium rounded-lg transition-all ${activeTab === 'products' ? 'bg-white text-secondary-600 shadow-sm' : 'text-secondary-100 hover:text-white hover:bg-white/10'}`}
-                        >
-                            Products
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('orders')}
-                            className={`px-4 py-2 font-medium rounded-lg transition-all ${activeTab === 'orders' ? 'bg-white text-secondary-600 shadow-sm' : 'text-secondary-100 hover:text-white hover:bg-white/10'}`}
-                        >
-                            Orders
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('settings')}
-                            className={`px-4 py-2 font-medium rounded-lg transition-all ${activeTab === 'settings' ? 'bg-white text-secondary-600 shadow-sm' : 'text-secondary-100 hover:text-white hover:bg-white/10'}`}
-                        >
-                            Store Settings
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('profile')}
-                            className={`px-4 py-2 font-medium rounded-lg transition-all ${activeTab === 'profile' ? 'bg-white text-secondary-600 shadow-sm' : 'text-secondary-100 hover:text-white hover:bg-white/10'}`}
-                        >
-                            Profile
-                        </button>
+            <div className="bg-secondary-600 text-white shadow-xl">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+                            <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
+                                <Store className="w-7 h-7 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-black font-heading tracking-tight leading-none mb-1">{shop?.name || 'Seller Dashboard'}</h1>
+                                <p className="text-secondary-100 text-sm font-bold opacity-80 uppercase tracking-widest">
+                                    Welcome back, {user?.name}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+                            <div className="flex items-center justify-between gap-4 px-5 py-3 bg-black/20 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                <span className={`text-xs font-black uppercase tracking-widest ${shop?.status === 'open' ? 'text-green-400' : 'text-red-400'}`}>
+                                    {shop?.status === 'open' ? 'Live Now' : 'Store Offline'}
+                                </span>
+                                <button
+                                    onClick={async () => {
+                                        const newStatus = shop?.status === 'open' ? 'closed' : 'open';
+                                        try {
+                                            const res = await api.put(`/shops/${shop._id}`, { status: newStatus });
+                                            if (res.data.success) {
+                                                setShop({ ...shop, status: newStatus });
+                                                toast.success(`Store is now ${newStatus}`);
+                                            }
+                                        } catch (err) {
+                                            toast.error("Failed to update status");
+                                        }
+                                    }}
+                                    className={`w-12 h-6 rounded-full transition-all relative ${shop?.status === 'open' ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-gray-500'}`}
+                                >
+                                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-sm ${shop?.status === 'open' ? 'right-1' : 'left-1'}`} />
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 px-4 py-2 bg-secondary-700/50 rounded-xl backdrop-blur-sm">
-                            <span className={`text-sm font-bold ${shop?.status === 'open' ? 'text-green-400' : 'text-red-400'}`}>
-                                {shop?.status === 'open' ? 'Store Open' : 'Store Closed'}
-                            </span>
+                    <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                        {([
+                            { id: 'analytics', label: 'Overview' },
+                            { id: 'products', label: 'Products' },
+                            { id: 'orders', label: 'Orders' },
+                            { id: 'settings', label: 'Settings' },
+                            { id: 'profile', label: 'Profile' }
+                        ] as const).map((tab) => (
                             <button
-                                onClick={async () => {
-                                    const newStatus = shop?.status === 'open' ? 'closed' : 'open';
-                                    try {
-                                        const res = await api.put(`/shops/${shop._id}`, { status: newStatus });
-                                        if (res.data.success) {
-                                            setShop({ ...shop, status: newStatus });
-                                            toast.success(`Store is now ${newStatus}`);
-                                        }
-                                    } catch (err) {
-                                        toast.error("Failed to update status");
-                                    }
-                                }}
-                                className={`w-12 h-6 rounded-full transition-all relative ${shop?.status === 'open' ? 'bg-green-500' : 'bg-gray-400'}`}
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest whitespace-nowrap transition-all border ${activeTab === tab.id
+                                    ? 'bg-white text-secondary-600 border-white shadow-lg scale-105'
+                                    : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'}`}
                             >
-                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${shop?.status === 'open' ? 'right-1' : 'left-1'}`} />
+                                {tab.label}
                             </button>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>

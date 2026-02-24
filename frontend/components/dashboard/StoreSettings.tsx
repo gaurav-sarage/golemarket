@@ -17,22 +17,22 @@ const TimePicker = ({ value, onChange, disabled }: { value: string, onChange: (v
     const p = parts[2] || "AM";
 
     return (
-        <div className={`flex items-center gap-1.5 ${disabled ? 'opacity-20 pointer-events-none' : ''}`}>
-            <div className="flex bg-gray-50 rounded-2xl p-1.5 border-2 border-gray-100 shadow-sm transition-all focus-within:border-primary-500 focus-within:ring-4 focus-within:ring-primary-500/10">
+        <div className={`flex items-center justify-center ${disabled ? 'opacity-20 pointer-events-none' : ''}`}>
+            <div className="flex bg-white rounded-xl p-1 border border-gray-200 shadow-sm transition-all focus-within:border-primary-500 min-w-fit">
                 <select
                     value={h}
                     onChange={(e) => onChange(`${e.target.value}:${m} ${p}`)}
-                    className="bg-transparent text-sm font-black outline-none cursor-pointer px-2 w-12 sm:w-14 text-center appearance-none"
+                    className="bg-transparent text-[13px] font-bold outline-none cursor-pointer px-1 w-10 text-center appearance-none"
                 >
                     {Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(val => (
                         <option key={val} value={val}>{val}</option>
                     ))}
                 </select>
-                <span className="text-sm font-black text-gray-300 self-center mx-0.5">:</span>
+                <span className="text-[10px] font-bold text-gray-300 self-center">:</span>
                 <select
                     value={m}
                     onChange={(e) => onChange(`${h}:${e.target.value} ${p}`)}
-                    className="bg-transparent text-sm font-black outline-none cursor-pointer px-2 w-12 sm:w-14 text-center appearance-none"
+                    className="bg-transparent text-[13px] font-bold outline-none cursor-pointer px-1 w-10 text-center appearance-none"
                 >
                     {['00', '15', '30', '45'].map(val => (
                         <option key={val} value={val}>{val}</option>
@@ -41,7 +41,7 @@ const TimePicker = ({ value, onChange, disabled }: { value: string, onChange: (v
                 <select
                     value={p}
                     onChange={(e) => onChange(`${h}:${m} ${e.target.value}`)}
-                    className="bg-primary-50 text-xs font-black outline-none cursor-pointer px-3 py-1.5 rounded-xl ml-2 text-primary-700 hover:bg-primary-100 transition-colors appearance-none"
+                    className="bg-primary-50 text-[10px] font-black outline-none cursor-pointer px-2 py-1 rounded-lg ml-1 text-primary-700 appearance-none"
                 >
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -279,22 +279,41 @@ export default function StoreSettings({ shop, onUpdate }: StoreSettingsProps) {
 
                         <div className="p-8 space-y-4">
                             {form.businessHours.map((schedule: any, index: number) => (
-                                <div key={schedule.day} className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 rounded-[32px] transition-all border-2 ${schedule.isClosed ? 'bg-red-50/30 border-red-50 grayscale-[0.5]' : 'bg-white border-gray-50 hover:border-primary-100 hover:shadow-xl hover:shadow-primary-500/5 group'}`}>
-                                    <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xs ${schedule.isClosed ? 'bg-red-100 text-red-600' : 'bg-primary-50 text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300'}`}>
-                                            {schedule.day.substring(0, 3)}
+                                <div key={schedule.day} className={`p-5 rounded-[24px] transition-all border ${schedule.isClosed ? 'bg-red-50/20 border-red-50' : 'bg-white border-gray-100 hover:border-primary-200 shadow-sm'}`}>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs ${schedule.isClosed ? 'bg-red-100 text-red-600' : 'bg-primary-50 text-primary-600'}`}>
+                                                {schedule.day.substring(0, 3)}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-gray-900 leading-tight">{schedule.day}</p>
+                                                <p className={`text-[10px] font-bold uppercase tracking-wider ${schedule.isClosed ? 'text-red-500' : 'text-green-500'}`}>
+                                                    {schedule.isClosed ? 'Closed' : 'Open'}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-black text-gray-900">{schedule.day}</span>
-                                            <span className={`text-[10px] font-black uppercase tracking-widest ${schedule.isClosed ? 'text-red-400' : 'text-green-500'}`}>
-                                                {schedule.isClosed ? 'Currently Closed' : 'Operational'}
-                                            </span>
-                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const newHours = [...form.businessHours];
+                                                newHours[index].isClosed = !newHours[index].isClosed;
+                                                setForm({ ...form, businessHours: newHours });
+                                            }}
+                                            className={`h-9 px-4 rounded-xl flex items-center gap-2 transition-all font-bold text-[10px] tracking-wider border ${schedule.isClosed
+                                                ? 'bg-red-500 text-white border-red-400'
+                                                : 'bg-white text-gray-500 border-gray-200'
+                                                }`}
+                                        >
+                                            <div className={`w-1.5 h-1.5 rounded-full ${schedule.isClosed ? 'bg-white' : 'bg-gray-300'}`} />
+                                            {schedule.isClosed ? 'OPEN' : 'CLOSE'}
+                                        </button>
                                     </div>
 
-                                    <div className="flex flex-wrap items-center gap-4 justify-end">
-                                        {!schedule.isClosed ? (
-                                            <div className="flex items-center gap-3">
+                                    {!schedule.isClosed ? (
+                                        <div className="flex items-center gap-2 bg-gray-50/50 p-3 rounded-2xl border border-gray-50">
+                                            <div className="flex-1">
+                                                <p className="text-[9px] font-extrabold text-gray-400 uppercase mb-1 ml-1 text-center">Opening</p>
                                                 <TimePicker
                                                     value={schedule.open}
                                                     onChange={(val) => {
@@ -303,7 +322,10 @@ export default function StoreSettings({ shop, onUpdate }: StoreSettingsProps) {
                                                         setForm({ ...form, businessHours: newHours });
                                                     }}
                                                 />
-                                                <div className="w-6 h-[2px] bg-gray-100 rounded-full" />
+                                            </div>
+                                            <div className="w-4 h-[1px] bg-gray-200 mt-4" />
+                                            <div className="flex-1">
+                                                <p className="text-[9px] font-extrabold text-gray-400 uppercase mb-1 ml-1 text-center">Closing</p>
                                                 <TimePicker
                                                     value={schedule.close}
                                                     onChange={(val) => {
@@ -313,30 +335,12 @@ export default function StoreSettings({ shop, onUpdate }: StoreSettingsProps) {
                                                     }}
                                                 />
                                             </div>
-                                        ) : (
-                                            <div className="px-6 py-3 bg-red-100/50 rounded-2xl border border-red-100">
-                                                <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] flex items-center gap-2">
-                                                    <AlertCircle className="w-3 h-3" /> STORE IS CLOSED FOR THE DAY
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const newHours = [...form.businessHours];
-                                                newHours[index].isClosed = !newHours[index].isClosed;
-                                                setForm({ ...form, businessHours: newHours });
-                                            }}
-                                            className={`shrink-0 h-14 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all font-black text-[10px] tracking-widest border-2 ${schedule.isClosed
-                                                ? 'bg-red-600 text-white border-red-500 shadow-xl shadow-red-500/20'
-                                                : 'bg-white text-gray-400 border-gray-100 hover:text-green-600 hover:border-green-100'
-                                                }`}
-                                        >
-                                            <div className={`w-2 h-2 rounded-full ${schedule.isClosed ? 'bg-white' : 'bg-green-500 animate-pulse'}`} />
-                                            {schedule.isClosed ? 'OPEN IT' : 'CLOSE IT'}
-                                        </button>
-                                    </div>
+                                        </div>
+                                    ) : (
+                                        <div className="p-4 bg-red-50/50 rounded-2xl border border-dotted border-red-100 text-center">
+                                            <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Shop is closed on this day</span>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
