@@ -100,13 +100,49 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+// Shared fulfillment logic
+const fulfillOrder = async (razorpayOrderId: string, razorpayPaymentId: string, razorpaySignature?: string) => {
+    const payment = await Payment.findOne({ razorpayOrderId });
+    if (!payment || payment.status === 'success') return;
+
+    payment.status = 'success';
+    payment.razorpayPaymentId = razorpayPaymentId;
+    if (razorpaySignature) payment.razorpaySignature = razorpaySignature;
+    await payment.save();
+
+    await Order.findByIdAndUpdate(payment.orderId, { status: 'Paid', paymentId: payment._id });
+
+    const shopOrders = await ShopOrder.find({ orderId: payment.orderId });
+    for (const shopOrder of shopOrders) {
+        shopOrder.status = 'Paid';
+        await shopOrder.save();
+
+        for (const item of shopOrder.items) {
+            const product = await Product.findOneAndUpdate(
+                { _id: item.productId, stockQuantity: { $gte: item.quantity } },
+                { $inc: { stockQuantity: -item.quantity } },
+                { new: true }
+            );
+
+            if (product) {
+                await InventoryLog.create({
+                    productId: item.productId,
+                    shopId: shopOrder.shopId,
+                    quantityChanged: -item.quantity,
+                    newQuantity: product.stockQuantity,
+                    reason: 'sale',
+                    referenceId: payment.orderId
+                });
+            }
+        }
+    }
+
+    await Cart.findOneAndUpdate({ userId: payment.userId }, { shops: [], totalPrice: 0 });
+};
+
 export const verifyPayment = async (req: Request, res: Response): Promise<void> => {
     try {
         const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
-        const userId = (req as any).user.id;
-
-        const payment = await Payment.findOne({ razorpayOrderId });
-        if (!payment) { res.status(404).json({ success: false, message: 'Payment record not found' }); return; }
 
         const body = razorpayOrderId + "|" + razorpayPaymentId;
         const expectedSignature = crypto
@@ -115,50 +151,43 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
             .digest('hex');
 
         if (expectedSignature !== razorpaySignature) {
-            payment.status = 'failed';
-            await payment.save();
-            await Order.findByIdAndUpdate(payment.orderId, { status: 'Failed' });
+            const payment = await Payment.findOne({ razorpayOrderId });
+            if (payment) {
+                payment.status = 'failed';
+                await payment.save();
+                await Order.findByIdAndUpdate(payment.orderId, { status: 'Failed' });
+            }
             res.status(400).json({ success: false, message: 'Invalid payment signature' });
             return;
         }
 
-        payment.status = 'success';
-        payment.razorpayPaymentId = razorpayPaymentId;
-        payment.razorpaySignature = razorpaySignature;
-        await payment.save();
-
-        await Order.findByIdAndUpdate(payment.orderId, { status: 'Paid', paymentId: payment._id });
-
-        const shopOrders = await ShopOrder.find({ orderId: payment.orderId });
-        for (const shopOrder of shopOrders) {
-            shopOrder.status = 'Paid';
-            await shopOrder.save();
-
-            for (const item of shopOrder.items) {
-                const product = await Product.findOneAndUpdate(
-                    { _id: item.productId, stockQuantity: { $gte: item.quantity } },
-                    { $inc: { stockQuantity: -item.quantity } },
-                    { new: true }
-                );
-
-                if (product) {
-                    await InventoryLog.create({
-                        productId: item.productId,
-                        shopId: shopOrder.shopId,
-                        quantityChanged: -item.quantity,
-                        newQuantity: product.stockQuantity,
-                        reason: 'sale',
-                        referenceId: payment.orderId
-                    });
-                }
-            }
-        }
-
-        await Cart.findOneAndUpdate({ userId }, { shops: [], totalPrice: 0 });
-
+        await fulfillOrder(razorpayOrderId, razorpayPaymentId, razorpaySignature);
         res.status(200).json({ success: true, message: 'Payment verified and order processed' });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'webhook_secret';
+    const signature = req.headers['x-razorpay-signature'];
+
+    const expectedSignature = crypto
+        .createHmac('sha256', secret)
+        .update(JSON.stringify(req.body))
+        .digest('hex');
+
+    if (expectedSignature === signature) {
+        const { event, payload } = req.body;
+
+        if (event === 'order.paid' || event === 'payment.captured') {
+            const orderId = payload.payment.entity.order_id;
+            const paymentId = payload.payment.entity.id;
+            await fulfillOrder(orderId, paymentId);
+        }
+        res.status(200).json({ status: 'ok' });
+    } else {
+        res.status(400).json({ status: 'verification_failed' });
     }
 };
 
