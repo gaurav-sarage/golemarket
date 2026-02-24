@@ -16,6 +16,7 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
     const [products, setProducts] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [sortBy, setSortBy] = useState<string>("default"); // default, price-asc, price-desc, name-asc, name-desc
+    const [foodTypeFilter, setFoodTypeFilter] = useState<string>("All");
 
     const { addToCart } = useCartStore();
 
@@ -56,13 +57,18 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
     };
 
     const getSortedProducts = () => {
-        const sorted = [...products];
+        let filtered = [...products];
+
+        if (foodTypeFilter !== "All") {
+            filtered = filtered.filter(p => p.foodType === foodTypeFilter);
+        }
+
         switch (sortBy) {
-            case "price-asc": return sorted.sort((a, b) => a.price - b.price);
-            case "price-desc": return sorted.sort((a, b) => b.price - a.price);
-            case "name-asc": return sorted.sort((a, b) => a.name.localeCompare(b.name));
-            case "name-desc": return sorted.sort((a, b) => b.name.localeCompare(a.name));
-            default: return sorted;
+            case "price-asc": return filtered.sort((a, b) => a.price - b.price);
+            case "price-desc": return filtered.sort((a, b) => b.price - a.price);
+            case "name-asc": return filtered.sort((a, b) => a.name.localeCompare(b.name));
+            case "name-desc": return filtered.sort((a, b) => b.name.localeCompare(a.name));
+            default: return filtered;
         }
     };
 
@@ -126,10 +132,29 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
                 <div className="md:col-span-1">
                     <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24 shadow-sm">
                         <h3 className="font-bold text-lg mb-4 text-gray-900">Categories</h3>
-                        <ul className="space-y-2">
+                        <ul className="space-y-2 mb-8">
                             <li className="font-medium text-primary-600 bg-primary-50 px-3 py-2 rounded-lg cursor-pointer transition-colors">All Products</li>
-                            {/* Note: Dynamic categories would go here */}
                         </ul>
+
+                        {(shop.shopType === 'restaurant' || shop.shopType === 'grocery' || shop.shopType === 'cafes') && (
+                            <>
+                                <h3 className="font-bold text-lg mb-4 text-gray-900 border-t pt-6">Food Type</h3>
+                                <div className="space-y-2">
+                                    {["All", "Veg", "Non-Veg", "Egg"].map(type => (
+                                        <label key={type} className="flex items-center gap-3 cursor-pointer group">
+                                            <input
+                                                type="radio"
+                                                name="foodType"
+                                                checked={foodTypeFilter === type}
+                                                onChange={() => setFoodTypeFilter(type)}
+                                                className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                            />
+                                            <span className={`text-sm font-medium ${foodTypeFilter === type ? 'text-primary-600' : 'text-gray-600 group-hover:text-gray-900'}`}>{type}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -187,6 +212,18 @@ export default function ShopDetails({ params }: { params: Promise<{ id: string }
                                             {product.stockQuantity === 0 && (
                                                 <div className="absolute top-3 left-3 bg-gray-800 text-white px-2 py-1 rounded-full text-xs font-bold">
                                                     Out of Stock
+                                                </div>
+                                            )}
+                                            {product.foodType && product.foodType !== 'Not Applicable' && (
+                                                <div className={`absolute top-3 right-3 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1 ${product.foodType === 'Veg' ? 'bg-green-100 text-green-700 border border-green-200' :
+                                                        product.foodType === 'Non-Veg' ? 'bg-red-100 text-red-700 border border-red-200' :
+                                                            'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                                                    }`}>
+                                                    <div className={`w-2 h-2 rounded-full ${product.foodType === 'Veg' ? 'bg-green-500' :
+                                                            product.foodType === 'Non-Veg' ? 'bg-red-500' :
+                                                                'bg-yellow-500'
+                                                        }`} />
+                                                    {product.foodType}
                                                 </div>
                                             )}
                                         </div>

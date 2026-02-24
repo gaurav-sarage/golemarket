@@ -22,6 +22,7 @@ export interface IProduct extends Document {
 
     // Type specific fields
     foodCategory?: string; // Veg / Non-Veg / Beverage / Combo
+    foodType?: 'Veg' | 'Non-Veg' | 'Egg' | 'Not Applicable';
     preparationTime?: number;
     portionSize?: string;
     stockLimitPerDay?: number;
@@ -71,6 +72,11 @@ const ProductSchema: Schema = new Schema({
     pickupAvailability: { type: Boolean, default: true },
 
     foodCategory: { type: String },
+    foodType: {
+        type: String,
+        enum: ['Veg', 'Non-Veg', 'Egg', 'Not Applicable'],
+        default: 'Not Applicable'
+    },
     preparationTime: { type: Number },
     portionSize: { type: String },
     stockLimitPerDay: { type: Number },

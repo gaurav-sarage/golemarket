@@ -12,6 +12,7 @@ import {
     updateProfile
 } from '../controllers/authController';
 import { protect } from '../middleware/auth';
+import { upload } from '../middleware/upload';
 
 const router = Router();
 
@@ -21,7 +22,7 @@ router.post('/shop-owner/register', registerShopOwner);
 router.post('/shop-owner/login', loginShopOwner);
 router.post('/logout', logout);
 router.get('/me', protect, getMe);
-router.put('/me', protect, updateProfile);
+router.put('/me', protect, upload.single('profileImage'), updateProfile);
 
 router.get('/verify-email/:token', verifyEmail);
 router.post('/forgot-password', forgotPassword);

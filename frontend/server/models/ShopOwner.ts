@@ -11,6 +11,13 @@ export interface IShopOwner extends Document {
     verificationToken?: string;
     resetPasswordToken?: string;
     resetPasswordExpire?: Date;
+    profileImage?: string;
+    payoutDetails?: {
+        bankName: string;
+        accountHolderName: string;
+        accountNumber: string;
+        ifscCode: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -26,6 +33,13 @@ const ShopOwnerSchema: Schema = new Schema({
     verificationToken: { type: String },
     resetPasswordToken: { type: String },
     resetPasswordExpire: { type: Date },
+    profileImage: { type: String },
+    payoutDetails: {
+        bankName: { type: String },
+        accountHolderName: { type: String },
+        accountNumber: { type: String },
+        ifscCode: { type: String }
+    }
 }, { timestamps: true });
 
 export const ShopOwner = (mongoose.models.ShopOwner as mongoose.Model<IShopOwner>) || mongoose.model<IShopOwner>("ShopOwner", ShopOwnerSchema);

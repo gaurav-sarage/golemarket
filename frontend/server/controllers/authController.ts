@@ -166,12 +166,32 @@ export const logout = (req: Request, res: Response): void => {
 export const updateProfile = async (req: Request, res: Response): Promise<void> => {
     try {
         const payload = (req as any).user;
-        const { name, phone } = req.body;
+        const { name, phone, email, password, payoutDetails } = req.body;
 
         let Model: any = payload.role === 'customer' || payload.role === 'admin' ? User : ShopOwner;
+        const updates: any = {};
+
+        if (name) updates.name = name;
+        if (phone) updates.phone = phone;
+        if (email) updates.email = email;
+        if (payoutDetails) {
+            // payoutDetails might come as a stringified JSON if sent via FormData
+            updates.payoutDetails = typeof payoutDetails === 'string' ? JSON.parse(payoutDetails) : payoutDetails;
+        }
+
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            updates.password = await bcrypt.hash(password, salt);
+        }
+
+        if (req.file) {
+            const b64 = Buffer.from(req.file.buffer).toString('base64');
+            updates.profileImage = `data:${req.file.mimetype};base64,${b64}`;
+        }
+
         const updatedUser = await Model.findByIdAndUpdate(
             payload.id,
-            { name, phone },
+            updates,
             { new: true, runValidators: true }
         ).select('-password');
 

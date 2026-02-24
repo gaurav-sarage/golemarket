@@ -17,6 +17,6 @@ router.get('/', getShops);
 router.get('/sections', getSections);
 router.get('/my-shop', protect, authorize('shop_owner'), getMyShop);
 router.get('/:id', getShopById);
-router.put('/:id', protect, authorize('shop_owner', 'admin'), updateShopProfile);
+router.put('/:id', protect, authorize('shop_owner', 'admin'), upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), updateShopProfile);
 
 export default router;

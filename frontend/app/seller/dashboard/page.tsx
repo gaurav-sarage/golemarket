@@ -6,6 +6,8 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle, Edit, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import StoreSettings from "../../../components/dashboard/StoreSettings";
+import ProfileSettings from "../../../components/dashboard/ProfileSettings";
 
 export default function SellerDashboard() {
     const { user } = useAuthStore();
@@ -13,7 +15,7 @@ export default function SellerDashboard() {
     const [analytics, setAnalytics] = useState<any>(null);
     const [products, setProducts] = useState<any[]>([]);
     const [orders, setOrders] = useState<any[]>([]);
-    const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders' | 'settings' | 'profile'>('analytics');
     const [isLoading, setIsLoading] = useState(false);
     const [needsSetup, setNeedsSetup] = useState(false);
 
@@ -33,7 +35,7 @@ export default function SellerDashboard() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const INITIAL_PRODUCT_STATE = {
         name: '', description: '', price: '', salePrice: '', sku: '', stockQuantity: '', categoryId: '',
-        foodCategory: 'Veg', preparationTime: '', portionSize: '', stockLimitPerDay: '',
+        foodCategory: 'Veg', foodType: 'Veg', preparationTime: '', portionSize: '', stockLimitPerDay: '',
         categoryName: '', subCategoryName: '', unitType: 'Piece', minimumOrderQuantity: '', expiryDate: '',
         serviceDuration: '', vehicleCompatibility: '', availableDays: '',
         deliveryEligibility: true, pickupAvailability: true, trackInventory: true,
@@ -182,6 +184,7 @@ export default function SellerDashboard() {
             stockQuantity: product.stockQuantity || '',
             categoryId: product.categoryId || '',
             foodCategory: product.foodCategory || 'Veg',
+            foodType: product.foodType || 'Veg',
             preparationTime: product.preparationTime || '',
             portionSize: product.portionSize || '',
             stockLimitPerDay: product.stockLimitPerDay || '',
@@ -302,7 +305,7 @@ export default function SellerDashboard() {
                             Welcome back, {user?.name}
                         </p>
                     </div>
-                    <div className="flex gap-2 p-1 bg-secondary-700/50 rounded-xl overflow-hidden backdrop-blur-sm">
+                    <div className="flex flex-wrap gap-2 p-1 bg-secondary-700/50 rounded-xl overflow-hidden backdrop-blur-sm">
                         <button
                             onClick={() => setActiveTab('analytics')}
                             className={`px-4 py-2 font-medium rounded-lg transition-all ${activeTab === 'analytics' ? 'bg-white text-secondary-600 shadow-sm' : 'text-secondary-100 hover:text-white hover:bg-white/10'}`}
@@ -321,6 +324,43 @@ export default function SellerDashboard() {
                         >
                             Orders
                         </button>
+                        <button
+                            onClick={() => setActiveTab('settings')}
+                            className={`px-4 py-2 font-medium rounded-lg transition-all ${activeTab === 'settings' ? 'bg-white text-secondary-600 shadow-sm' : 'text-secondary-100 hover:text-white hover:bg-white/10'}`}
+                        >
+                            Store Settings
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('profile')}
+                            className={`px-4 py-2 font-medium rounded-lg transition-all ${activeTab === 'profile' ? 'bg-white text-secondary-600 shadow-sm' : 'text-secondary-100 hover:text-white hover:bg-white/10'}`}
+                        >
+                            Profile
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 px-4 py-2 bg-secondary-700/50 rounded-xl backdrop-blur-sm">
+                            <span className={`text-sm font-bold ${shop?.status === 'open' ? 'text-green-400' : 'text-red-400'}`}>
+                                {shop?.status === 'open' ? 'Store Open' : 'Store Closed'}
+                            </span>
+                            <button
+                                onClick={async () => {
+                                    const newStatus = shop?.status === 'open' ? 'closed' : 'open';
+                                    try {
+                                        const res = await api.put(`/shops/${shop._id}`, { status: newStatus });
+                                        if (res.data.success) {
+                                            setShop({ ...shop, status: newStatus });
+                                            toast.success(`Store is now ${newStatus}`);
+                                        }
+                                    } catch (err) {
+                                        toast.error("Failed to update status");
+                                    }
+                                }}
+                                className={`w-12 h-6 rounded-full transition-all relative ${shop?.status === 'open' ? 'bg-green-500' : 'bg-gray-400'}`}
+                            >
+                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${shop?.status === 'open' ? 'right-1' : 'left-1'}`} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -464,6 +504,18 @@ export default function SellerDashboard() {
                                                 </div>
 
                                                 {/* Dynamic Category/Type based on Shop Type */}
+                                                {['restaurant', 'grocery', 'cafes', 'general stores'].includes(shop?.shopType) && (
+                                                    <div>
+                                                        <label className="block text-sm font-bold text-gray-700 mb-2">Food Type (Veg/Non-Veg)</label>
+                                                        <select value={newProduct.foodType} onChange={e => setNewProduct({ ...newProduct, foodType: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white">
+                                                            <option value="Veg">Veg</option>
+                                                            <option value="Non-Veg">Non-Veg</option>
+                                                            <option value="Egg">Egg</option>
+                                                            <option value="Not Applicable">Not Applicable</option>
+                                                        </select>
+                                                    </div>
+                                                )}
+
                                                 {shop?.shopType === 'restaurant' && (
                                                     <div>
                                                         <label className="block text-sm font-bold text-gray-700 mb-2">Food Category</label>
@@ -812,6 +864,14 @@ export default function SellerDashboard() {
                             )}
                         </div>
                     </div>
+                )}
+
+                {activeTab === 'settings' && (
+                    <StoreSettings shop={shop} onUpdate={setShop} />
+                )}
+
+                {activeTab === 'profile' && (
+                    <ProfileSettings user={user} onUpdate={checkAuth} />
                 )}
             </div>
         </div>

@@ -12,8 +12,23 @@ export interface IShop extends Document {
     businessHours?: string;
     logoImage?: string;
     bannerImage?: string;
-    status: 'active' | 'inactive';
+    status: 'active' | 'inactive' | 'open' | 'closed';
     rating: number;
+    address?: {
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+        coordinates?: { lat: number; lng: number };
+    };
+    deliveryType: 'delivery' | 'pickup' | 'both';
+    minimumOrderAmount: number;
+    deliveryCharges: number;
+    serviceRadius: number; // in km
+    policies?: {
+        returnPolicy: string;
+        deliveryPolicy: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -34,8 +49,26 @@ const ShopSchema: Schema = new Schema({
     businessHours: { type: String },
     logoImage: { type: String },
     bannerImage: { type: String },
-    status: { type: String, enum: ['active', 'inactive'], default: 'active' },
-    rating: { type: Number, default: 0 }
+    status: { type: String, enum: ['active', 'inactive', 'open', 'closed'], default: 'open' },
+    rating: { type: Number, default: 0 },
+    address: {
+        street: { type: String },
+        city: { type: String },
+        state: { type: String },
+        zipCode: { type: String },
+        coordinates: {
+            lat: { type: Number },
+            lng: { type: Number }
+        }
+    },
+    deliveryType: { type: String, enum: ['delivery', 'pickup', 'both'], default: 'both' },
+    minimumOrderAmount: { type: Number, default: 0 },
+    deliveryCharges: { type: Number, default: 0 },
+    serviceRadius: { type: Number, default: 5 },
+    policies: {
+        returnPolicy: { type: String },
+        deliveryPolicy: { type: String }
+    }
 }, { timestamps: true });
 
 export const Shop = (mongoose.models.Shop as mongoose.Model<IShop>) || mongoose.model<IShop>("Shop", ShopSchema);

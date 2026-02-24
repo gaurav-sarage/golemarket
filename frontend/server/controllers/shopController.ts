@@ -56,7 +56,34 @@ export const updateShopProfile = async (req: Request, res: Response): Promise<vo
             return;
         }
 
-        shop = await Shop.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const updates = { ...req.body };
+
+        // Handle file uploads if any
+        if (req.files) {
+            const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+            if (files['logo']?.[0]) {
+                const b64 = Buffer.from(files['logo'][0].buffer).toString('base64');
+                updates.logoImage = `data:${files['logo'][0].mimetype};base64,${b64}`;
+            }
+
+            if (files['banner']?.[0]) {
+                const b64 = Buffer.from(files['banner'][0].buffer).toString('base64');
+                updates.bannerImage = `data:${files['banner'][0].mimetype};base64,${b64}`;
+            }
+        }
+
+        // Handle category to section mapping if category is updated
+        if (updates.shopType) {
+            let sectionName = updates.shopType === 'others' ? 'Others' : updates.shopType.charAt(0).toUpperCase() + updates.shopType.slice(1);
+            let section = await Section.findOne({ name: sectionName });
+            if (!section) {
+                section = await Section.create({ name: sectionName, description: `${sectionName} shops` });
+            }
+            updates.section = section._id;
+        }
+
+        shop = await Shop.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
         res.status(200).json({ success: true, data: shop });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });
