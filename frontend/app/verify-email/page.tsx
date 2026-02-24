@@ -31,14 +31,10 @@ function VerifyEmailHandler() {
                     // Implicitly log them in since token establishes session!
                     login(data.user);
 
-                    // Redirect based on role
+                    // Redirect to onboarding experience
                     setTimeout(() => {
-                        if (data.user.role === 'shop_owner') {
-                            router.push('/seller/dashboard');
-                        } else {
-                            router.push('/shops');
-                        }
-                    }, 3000);
+                        router.push('/onboarding');
+                    }, 2000);
                 }
             } catch (err: any) {
                 setStatus("error");
