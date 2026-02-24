@@ -14,8 +14,8 @@ const router = Router();
 router.get('/', getProducts);
 router.get('/:id', getProductById);
 
-router.post('/', protect, authorize('shop_owner'), upload.single('image'), createProduct);
-router.put('/:id', protect, authorize('shop_owner'), upload.single('image'), updateProduct);
+router.post('/', protect, authorize('shop_owner'), upload.array('images', 3), createProduct);
+router.put('/:id', protect, authorize('shop_owner'), upload.array('images', 3), updateProduct);
 router.delete('/:id', protect, authorize('shop_owner'), deleteProduct);
 
 export default router;

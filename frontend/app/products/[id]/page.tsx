@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import api from "../../../lib/api";
 import { motion } from "framer-motion";
-import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowLeft, ShieldCheck, Truck, Clock, Tag } from "lucide-react";
+import { Star, MapPin, Phone, Mail, ShoppingCart, ArrowLeft, ShieldCheck, Truck, Clock, Tag, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCartStore } from "../../../store/useCartStore";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -13,6 +13,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
     const unwrappedParams = use(params);
     const { id } = unwrappedParams;
     const router = useRouter();
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const [product, setProduct] = useState<any>(null);
     const [shop, setShop] = useState<any>(null);
@@ -94,21 +95,55 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm p-8 sm:p-12 flex items-center justify-center min-h-[400px] lg:min-h-[600px] relative"
+                        className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm p-8 flex flex-col items-center justify-center min-h-[400px] lg:min-h-[600px] relative group"
                     >
-                        <img
-                            src={product.images?.[0] || "https://via.placeholder.com/600?text=No+Image"}
-                            alt={product.name}
-                            className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-700"
-                        />
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            <motion.img
+                                key={currentImageIndex}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.4 }}
+                                src={product.images?.[currentImageIndex] || "https://via.placeholder.com/600?text=No+Image"}
+                                alt={product.name}
+                                className="max-w-full max-h-[500px] object-contain"
+                            />
+
+                            {product.images?.length > 1 && (
+                                <>
+                                    <button
+                                        onClick={() => setCurrentImageIndex((currentImageIndex - 1 + product.images.length) % product.images.length)}
+                                        className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-800 hover:bg-white transition-all opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"
+                                    >
+                                        <ChevronLeft className="w-6 h-6" />
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentImageIndex((currentImageIndex + 1) % product.images.length)}
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-800 hover:bg-white transition-all opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0"
+                                    >
+                                        <ChevronRight className="w-6 h-6" />
+                                    </button>
+
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-2">
+                                        {product.images.map((_: any, idx: number) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setCurrentImageIndex(idx)}
+                                                className={`w-2 h-2 rounded-full transition-all ${idx === currentImageIndex ? 'bg-primary-600 w-6' : 'bg-gray-200'}`}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
                         {product.stockQuantity < 5 && product.stockQuantity > 0 && (
-                            <div className="absolute top-8 left-8 bg-red-100 text-red-600 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                                Limited Stock: {product.stockQuantity} left
+                            <div className="absolute top-8 left-8 bg-red-100 text-red-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm z-20">
+                                Low Stock: {product.stockQuantity} Left
                             </div>
                         )}
                         {product.stockQuantity === 0 && (
-                            <div className="absolute top-8 left-8 bg-gray-900 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                                Currently Out of Stock
+                            <div className="absolute top-8 left-8 bg-gray-900 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm z-20">
+                                Sold Out
                             </div>
                         )}
                     </motion.div>
@@ -152,15 +187,6 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                             <div className="grid grid-cols-2 gap-6 mb-10">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
-                                        <ShieldCheck className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Quality</p>
-                                        <p className="text-sm font-bold text-gray-900">Verified</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
                                         <Truck className="w-5 h-5" />
                                     </div>
                                     <div>
@@ -174,18 +200,18 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                                             <Clock className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Wait Time</p>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Prep Time</p>
                                             <p className="text-sm font-bold text-gray-900">{product.preparationTime} mins</p>
                                         </div>
                                     </div>
                                 )}
-                                {product.portionSize && (
+                                {product.portionSize && (['restaurant', 'cafes'].includes(shop?.shopType)) && (
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
                                             <Tag className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Size</p>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Portion</p>
                                             <p className="text-sm font-bold text-gray-900">{product.portionSize}</p>
                                         </div>
                                     </div>

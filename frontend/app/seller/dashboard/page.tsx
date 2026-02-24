@@ -42,7 +42,7 @@ export default function SellerDashboard() {
     const [isAddingProduct, setIsAddingProduct] = useState(false);
     const [isEditingProduct, setIsEditingProduct] = useState(false);
     const [editingProductId, setEditingProductId] = useState<string | null>(null);
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
     const INITIAL_PRODUCT_STATE = {
         name: '', description: '', price: '', salePrice: '', sku: '', stockQuantity: '', categoryId: '',
         foodCategory: 'Veg', foodType: 'Veg', preparationTime: '', portionSize: '', stockLimitPerDay: '',
@@ -148,8 +148,10 @@ export default function SellerDashboard() {
                 formData.append('categoryId', '600000000000000000000000');
             }
 
-            if (imageFile) {
-                formData.append('image', imageFile);
+            if (imageFiles.length > 0) {
+                imageFiles.forEach(file => {
+                    formData.append('images', file);
+                });
             }
 
             const endpoint = isEditingProduct ? `/products/${editingProductId}` : '/products';
@@ -172,7 +174,7 @@ export default function SellerDashboard() {
                 setIsEditingProduct(false);
                 setEditingProductId(null);
                 setNewProduct(INITIAL_PRODUCT_STATE);
-                setImageFile(null);
+                setImageFiles([]);
 
                 // Refresh analytics to update stats quickly
                 const analyticsRes = await api.get('/analytics/shop');
@@ -546,14 +548,14 @@ export default function SellerDashboard() {
                                                     </div>
                                                 )}
 
-                                                {shop?.shopType === 'restaurant' && (
+                                                {['restaurant', 'cafes'].includes(shop?.shopType) && (
                                                     <div>
                                                         <label className="block text-sm font-bold text-gray-700 mb-2">Prep Time (Min)</label>
                                                         <input type="number" value={newProduct.preparationTime} onChange={e => setNewProduct({ ...newProduct, preparationTime: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="15" />
                                                     </div>
                                                 )}
 
-                                                {shop?.shopType === 'restaurant' && (
+                                                {['restaurant', 'cafes'].includes(shop?.shopType) && (
                                                     <div>
                                                         <label className="block text-sm font-bold text-gray-700 mb-2">Portion / Size</label>
                                                         <input type="text" value={newProduct.portionSize} onChange={e => setNewProduct({ ...newProduct, portionSize: e.target.value })} className="w-full border-gray-200 rounded-xl p-3.5 border outline-none focus:ring-2 focus:ring-primary-500 transition-all bg-gray-50/50 focus:bg-white" placeholder="e.g. Full, Half, Regular" />
@@ -631,25 +633,49 @@ export default function SellerDashboard() {
                                         {/* Column 2: Status, Image & Inventory */}
                                         <div className="space-y-6">
                                             <div>
-                                                <label className="block text-sm font-bold text-gray-700 mb-2">Product Image</label>
-                                                <div className="mt-1 flex flex-col items-center justify-center p-6 border-2 border-gray-200 border-dashed rounded-2xl cursor-pointer hover:border-primary-500 transition-all bg-gray-50/50 group" onClick={() => document.getElementById('product-file-upload')?.click()}>
-                                                    {imageFile ? (
-                                                        <div className="text-center">
-                                                            <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-2" />
-                                                            <p className="text-primary-600 font-bold text-sm truncate max-w-[150px]">{imageFile.name}</p>
-                                                            <p className="text-gray-400 text-xs mt-1">Tap to change</p>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">Product Images (Up to 3)</label>
+                                                <div className="grid grid-cols-3 gap-3">
+                                                    {[0, 1, 2].map((idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className="aspect-square border-2 border-gray-200 border-dashed rounded-2xl cursor-pointer hover:border-primary-500 transition-all bg-gray-50/50 flex flex-col items-center justify-center p-2 text-center group relative overflow-hidden"
+                                                            onClick={() => document.getElementById(`file-upload-${idx}`)?.click()}
+                                                        >
+                                                            {imageFiles[idx] ? (
+                                                                <>
+                                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                                                                        <Trash2 className="w-6 h-6 text-white" onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const newFiles = [...imageFiles];
+                                                                            newFiles.splice(idx, 1);
+                                                                            setImageFiles(newFiles);
+                                                                        }} />
+                                                                    </div>
+                                                                    <img src={URL.createObjectURL(imageFiles[idx])} className="w-full h-full object-cover" />
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Plus className="w-6 h-6 text-gray-300 group-hover:text-primary-400 mb-1" />
+                                                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Img {idx + 1}</span>
+                                                                </>
+                                                            )}
+                                                            <input
+                                                                id={`file-upload-${idx}`}
+                                                                type="file"
+                                                                className="sr-only"
+                                                                accept="image/*"
+                                                                onChange={e => {
+                                                                    if (e.target.files && e.target.files[0]) {
+                                                                        const newFiles = [...imageFiles];
+                                                                        newFiles[idx] = e.target.files[0];
+                                                                        setImageFiles(newFiles.filter(Boolean));
+                                                                    }
+                                                                }}
+                                                            />
                                                         </div>
-                                                    ) : (
-                                                        <div className="text-center">
-                                                            <Plus className="w-10 h-10 text-gray-300 group-hover:text-primary-400 mx-auto mb-2" />
-                                                            <p className="text-sm font-bold text-gray-500 group-hover:text-primary-600">Upload Media</p>
-                                                            <p className="text-xs text-gray-400 mt-1">JPG, PNG up to 5MB</p>
-                                                        </div>
-                                                    )}
-                                                    <input id="product-file-upload" type="file" className="sr-only" accept="image/*" onChange={e => {
-                                                        if (e.target.files && e.target.files[0]) setImageFile(e.target.files[0]);
-                                                    }} />
+                                                    ))}
                                                 </div>
+                                                <p className="text-[10px] text-gray-400 mt-2 font-medium uppercase tracking-wider text-center">Tap to upload or replace photos</p>
                                             </div>
 
                                             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 space-y-6">

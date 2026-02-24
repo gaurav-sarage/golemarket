@@ -56,10 +56,12 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         }
 
         const payload = { ...req.body };
-        if (req.file) {
-            const b64 = Buffer.from(req.file.buffer).toString('base64');
-            const imageUrl = `data:${req.file.mimetype};base64,${b64}`;
-            payload.images = [imageUrl];
+        if (req.files && Array.isArray(req.files)) {
+            const imageUrls = (req.files as Express.Multer.File[]).map(file => {
+                const b64 = Buffer.from(file.buffer).toString('base64');
+                return `data:${file.mimetype};base64,${b64}`;
+            });
+            payload.images = imageUrls;
         }
 
         const product = await Product.create(payload);
@@ -80,7 +82,16 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
-        product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const payload = { ...req.body };
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            const imageUrls = (req.files as Express.Multer.File[]).map(file => {
+                const b64 = Buffer.from(file.buffer).toString('base64');
+                return `data:${file.mimetype};base64,${b64}`;
+            });
+            payload.images = imageUrls;
+        }
+
+        product = await Product.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
         res.status(200).json({ success: true, data: product });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });
