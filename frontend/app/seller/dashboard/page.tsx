@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle, Edit, Trash2 } from "lucide-react";
+import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle, Edit, Trash2, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import StoreSettings from "../../../components/dashboard/StoreSettings";
 import ProfileSettings from "../../../components/dashboard/ProfileSettings";
 import OnboardingWelcome from "../../../components/onboarding/OnboardingWelcome";
@@ -308,32 +309,51 @@ export default function SellerDashboard() {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* Small Sidebar / Topbar for navigation */}
-            <div className="bg-secondary-600 text-white shadow-xl">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
-                            <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
-                                <Store className="w-7 h-7 text-white" />
+            {/* Premium Header Architecture */}
+            <div className="relative overflow-hidden bg-slate-900 text-white shadow-2xl">
+                {/* Visual Depth Elements */}
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-600/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 relative z-10">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+                        {/* Shop Brand Section */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 w-full lg:w-auto">
+                            <div className="w-16 h-16 bg-white/10 rounded-[1.5rem] flex items-center justify-center backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden relative group">
+                                <div className="absolute inset-0 bg-primary-500 opacity-0 group-hover:opacity-10 shadow-inner transition-opacity" />
+                                <Store className="w-8 h-8 text-white relative z-10" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-black font-heading tracking-tight leading-none mb-1">{shop?.name || 'Seller Dashboard'}</h1>
-                                <p className="text-secondary-100 text-sm font-bold opacity-80 uppercase tracking-widest">
-                                    Welcome back, {user?.name}
-                                </p>
+                                <h1 className="text-3xl md:text-4xl font-black font-heading tracking-tight leading-none mb-2">
+                                    {shop?.name || 'Seller Dashboard'}
+                                </h1>
+                                <div className="flex items-center gap-3">
+                                    <p className="text-slate-400 text-sm font-bold uppercase tracking-[0.2em]">
+                                        Welcome, <span className="text-white">{user?.name}</span>
+                                    </p>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                                    <div className="flex items-center gap-2">
+                                        <div className={`w-2 h-2 rounded-full ${isStoreCurrentlyOpen(shop).isOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                                        <span className={`text-[10px] font-black uppercase tracking-wider ${isStoreCurrentlyOpen(shop).isOpen ? 'text-green-400' : 'text-red-400'}`}>
+                                            {isStoreCurrentlyOpen(shop).message}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
-                            <div className="flex items-center justify-between gap-4 px-5 py-3 bg-black/20 rounded-2xl border border-white/10 backdrop-blur-sm">
-                                <span className={`text-xs font-black uppercase tracking-widest ${isStoreCurrentlyOpen(shop).isOpen ? 'text-green-400' : 'text-red-400'}`}>
-                                    {isStoreCurrentlyOpen(shop).message}
-                                </span>
-                            </div>
+                        {/* Quick Action Area */}
+                        <div className="hidden lg:flex items-center gap-4">
+                            <Link href={`/shops/${shop?.slug || ''}`} target="_blank" className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm tracking-wide hover:bg-white/10 transition-all flex items-center gap-2 backdrop-blur-md">
+                                View Public Shop <ArrowRight className="w-4 h-4" />
+                            </Link>
                         </div>
                     </div>
 
-                    <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                    {/* Navigation Tabs - Swappablepill design */}
+                    <div className="mt-10 md:mt-12 flex items-center p-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl w-fit max-w-full overflow-x-auto no-scrollbar">
                         {([
                             { id: 'analytics', label: 'Overview' },
                             { id: 'products', label: 'Products' },
@@ -344,9 +364,9 @@ export default function SellerDashboard() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest whitespace-nowrap transition-all border ${activeTab === tab.id
-                                    ? 'bg-white text-secondary-600 border-white shadow-lg scale-105'
-                                    : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'}`}
+                                className={`px-5 py-3 md:px-8 md:py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest whitespace-nowrap transition-all duration-300 ${activeTab === tab.id
+                                    ? 'bg-white text-slate-900 shadow-xl scale-[1.02]'
+                                    : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                             >
                                 {tab.label}
                             </button>
@@ -357,72 +377,88 @@ export default function SellerDashboard() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
                 {activeTab === 'analytics' && analytics && (
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow cursor-default">
-                                <div className="p-4 bg-green-50 rounded-xl text-green-600">
-                                    <DollarSign className="w-8 h-8" />
+                    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div>
+                            <h3 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                <TrendingUp className="w-6 h-6 text-primary-600" />
+                                Shop Performance
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col gap-4 hover:shadow-xl hover:border-primary-100 transition-all group">
+                                    <div className="p-4 bg-green-50 rounded-2xl text-green-600 w-fit group-hover:scale-110 transition-transform">
+                                        <DollarSign className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Total Revenue</p>
+                                        <p className="text-3xl font-black text-slate-900 leading-none">₹{analytics.totalRevenue.toLocaleString()}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500 mb-1">Total Revenue</p>
-                                    <p className="text-2xl font-bold text-gray-900">₹{analytics.totalRevenue}</p>
+                                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col gap-4 hover:shadow-xl hover:border-blue-100 transition-all group">
+                                    <div className="p-4 bg-blue-50 rounded-2xl text-blue-600 w-fit group-hover:scale-110 transition-transform">
+                                        <ShoppingCart className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Total Orders</p>
+                                        <p className="text-3xl font-black text-slate-900 leading-none">{analytics.totalOrders}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow cursor-default">
-                                <div className="p-4 bg-blue-50 rounded-xl text-blue-600">
-                                    <ShoppingCart className="w-8 h-8" />
+                                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col gap-4 hover:shadow-xl hover:border-purple-100 transition-all group">
+                                    <div className="p-4 bg-purple-50 rounded-2xl text-purple-600 w-fit group-hover:scale-110 transition-transform">
+                                        <Package className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Active Products</p>
+                                        <p className="text-3xl font-black text-slate-900 leading-none">{products.length}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500 mb-1">Total Orders</p>
-                                    <p className="text-2xl font-bold text-gray-900">{analytics.totalOrders}</p>
-                                </div>
-                            </div>
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow cursor-default">
-                                <div className="p-4 bg-purple-50 rounded-xl text-purple-600">
-                                    <Package className="w-8 h-8" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500 mb-1">Active Products</p>
-                                    <p className="text-2xl font-bold text-gray-900">{products.length}</p>
-                                </div>
-                            </div>
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow cursor-default">
-                                <div className="p-4 bg-orange-50 rounded-xl text-orange-600">
-                                    <TrendingUp className="w-8 h-8" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500 mb-1">Avg Order Value</p>
-                                    <p className="text-2xl font-bold text-gray-900">
-                                        ₹{analytics.totalOrders > 0 ? Math.round(analytics.totalRevenue / analytics.totalOrders) : 0}
-                                    </p>
+                                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col gap-4 hover:shadow-xl hover:border-orange-100 transition-all group">
+                                    <div className="p-4 bg-orange-50 rounded-2xl text-orange-600 w-fit group-hover:scale-110 transition-transform">
+                                        <TrendingUp className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Avg Order Value</p>
+                                        <p className="text-3xl font-black text-slate-900 leading-none">
+                                            ₹{analytics.totalOrders > 0 ? Math.round(analytics.totalRevenue / analytics.totalOrders).toLocaleString() : 0}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mt-8">
-                            <h3 className="text-xl font-bold text-gray-900 mb-6">Best Selling Products</h3>
-                            {analytics.bestSellingProducts.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead>
-                                            <tr>
-                                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-bold text-gray-500 uppercase tracking-wider rounded-tl-xl">Product Name</th>
-                                                <th className="px-6 py-3 bg-gray-50 text-right text-xs font-bold text-gray-500 uppercase tracking-wider rounded-tr-xl">Units Sold</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-gray-100">
-                                            {analytics.bestSellingProducts.map((p: any) => (
-                                                <tr key={p.name} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right font-bold">{p.count}</td>
+                        <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="p-8 sm:p-10 border-b border-slate-50 flex items-center justify-between">
+                                <h3 className="text-xl font-black text-slate-900">Best Selling Products</h3>
+                                <div className="px-4 py-2 bg-slate-50 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400">Monthly Stats</div>
+                            </div>
+                            <div className="p-8 sm:p-10">
+                                {analytics.bestSellingProducts.length > 0 ? (
+                                    <div className="overflow-hidden rounded-3xl border border-slate-100">
+                                        <table className="min-w-full divide-y divide-slate-100">
+                                            <thead>
+                                                <tr className="bg-slate-50/50">
+                                                    <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Product Name</th>
+                                                    <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Units Sold</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <p className="text-gray-500 text-center py-10 bg-gray-50 rounded-xl">No sales data available yet.</p>
-                            )}
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-slate-50">
+                                                {analytics.bestSellingProducts.map((p: any) => (
+                                                    <tr key={p.name} className="hover:bg-slate-50/50 transition-colors group">
+                                                        <td className="px-8 py-6 whitespace-nowrap text-sm font-bold text-slate-900">{p.name}</td>
+                                                        <td className="px-8 py-6 whitespace-nowrap text-sm text-slate-400 text-right">
+                                                            <span className="bg-slate-100 text-slate-900 px-3 py-1 rounded-lg font-black">{p.count}</span>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-20 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
+                                        <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                                        <p className="text-slate-500 font-bold">No sales data available yet.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -825,48 +861,90 @@ export default function SellerDashboard() {
                             </div>
                         )}
 
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">SKU</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-100">
-                                        {products.map(product => (
-                                            <tr key={product._id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-l-4 border-transparent hover:border-secondary-500">
-                                                    {product.name}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.sku}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">₹{product.price}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${product.stockQuantity > 10 ? 'bg-green-100 text-green-800' : product.stockQuantity > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                                                        {product.stockQuantity} in stock
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <div className="flex gap-2">
-                                                        <button onClick={() => handleEditClick(product)} className="text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors font-semibold flex items-center gap-1.5">
-                                                            <Edit className="w-4 h-4" /> Edit
-                                                        </button>
-                                                        <button onClick={() => handleDeleteProduct(product._id)} className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors font-semibold flex items-center gap-1.5">
-                                                            <Trash2 className="w-4 h-4" /> Delete
-                                                        </button>
-                                                    </div>
-                                                </td>
+                        <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                            {products.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-slate-100">
+                                        <thead>
+                                            <tr className="bg-slate-50/50">
+                                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Product Details</th>
+                                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Inventory Status</th>
+                                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Price</th>
+                                                <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {products.length === 0 && (
-                                <div className="p-10 text-center text-gray-500 bg-gray-50">No products found. Start by adding some!</div>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-slate-50">
+                                            {products.map(product => {
+                                                const hasImage = product.images && product.images.length > 0;
+                                                const stock = product.stockQuantity || 0;
+
+                                                return (
+                                                    <tr key={product._id} className="hover:bg-slate-50/50 transition-colors group">
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex-shrink-0 overflow-hidden border border-slate-200 shadow-sm relative">
+                                                                    {hasImage ? (
+                                                                        <img src={product.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                                    ) : (
+                                                                        <Package className="w-6 h-6 text-slate-300 absolute inset-0 m-auto" />
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    <div className="text-sm font-black text-slate-900 mb-0.5">{product.name}</div>
+                                                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.sku || 'No SKU'}</div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex flex-col gap-1.5">
+                                                                <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider w-fit border ${stock > 10 ? 'bg-green-50 text-green-700 border-green-100' :
+                                                                        stock > 0 ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                                                            'bg-red-50 text-red-700 border-red-100'
+                                                                    }`}>
+                                                                    {stock > 0 ? `${stock} AVAILABLE` : 'OUT OF STOCK'}
+                                                                </span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className={`w-1.5 h-1.5 rounded-full ${product.productStatus === 'Published' ? 'bg-primary-500' : 'bg-slate-300'}`} />
+                                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.productStatus}</span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6 whitespace-nowrap">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-black text-slate-900">₹{product.price}</span>
+                                                                {product.salePrice && <span className="text-xs text-slate-400 line-through">₹{product.salePrice}</span>}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right">
+                                                            <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button onClick={() => handleEditClick(product)} className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-100 transition-all shadow-sm active:scale-95">
+                                                                    <Edit className="w-4 h-4" />
+                                                                </button>
+                                                                <button onClick={() => handleDeleteProduct(product._id)} className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all shadow-sm active:scale-95">
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="text-center py-24 bg-slate-50/50">
+                                    <div className="inline-flex w-20 h-20 bg-white shadow-xl shadow-slate-200/50 rounded-[2rem] items-center justify-center text-slate-300 mb-6 border border-slate-100">
+                                        <Package className="w-10 h-10" />
+                                    </div>
+                                    <h3 className="text-2xl font-black text-slate-900 mb-2">Inventory is empty</h3>
+                                    <p className="text-slate-500 font-medium max-w-sm mx-auto mb-8">Start by adding your first product or service to begin selling on GoleMarket.</p>
+                                    <button
+                                        onClick={() => setIsAddingProduct(true)}
+                                        className="bg-primary-600 text-white px-8 py-4 rounded-3xl font-black shadow-xl shadow-primary-600/20 hover:bg-primary-700 active:scale-95 transition-all text-sm uppercase tracking-widest"
+                                    >
+                                        Create First Item
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>
