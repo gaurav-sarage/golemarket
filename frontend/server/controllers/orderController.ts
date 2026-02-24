@@ -17,6 +17,16 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
         const userId = (req as any).user.id;
         const { shippingAddress, phoneNumber } = req.body;
 
+        // Check for required environment variables
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            console.error("Missing Razorpay credentials in environment");
+            res.status(500).json({
+                success: false,
+                message: 'Payment gateway configuration missing. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.'
+            });
+            return;
+        }
+
         const cart = await Cart.findOne({ userId }).populate('shops.items.productId');
         if (!cart || cart.shops.length === 0) {
             res.status(400).json({ success: false, message: 'Cart is empty' });
@@ -34,22 +44,38 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
                     });
                     return;
                 }
-                totalAmount += item.quantity * item.price;
+                const price = item.price || product.price || 0;
+                totalAmount += item.quantity * price;
             }
         }
 
-        // Add 5% GST and Handling Fee to match frontend grandTotal
+        if (isNaN(totalAmount) || totalAmount <= 0) {
+            res.status(400).json({ success: false, message: 'Invalid total amount in cart' });
+            return;
+        }
+
+        // Add 5% GST and Handling Fee
         const tax = Math.round(totalAmount * 0.05);
         const handlingFee = 15;
         const finalAmount = totalAmount + tax + handlingFee;
 
-        console.log(`Creating Razorpay order for ${finalAmount} INR`);
+        console.log(`Initialising Razorpay order for ${finalAmount} INR (including GST and Handling)`);
 
-        const razorpayOrder = await razorpay.orders.create({
-            amount: finalAmount * 100, // paise
-            currency: 'INR',
-            receipt: `receipt_${Date.now()}`
-        });
+        let razorpayOrder;
+        try {
+            razorpayOrder = await razorpay.orders.create({
+                amount: finalAmount * 100, // paise
+                currency: 'INR',
+                receipt: `receipt_${Date.now()}`
+            });
+        } catch (rzpErr: any) {
+            console.error("Razorpay Order Creation Failed:", rzpErr);
+            res.status(500).json({
+                success: false,
+                message: `Razorpay Error: ${rzpErr.description || rzpErr.error?.description || rzpErr.message || 'Verification failed at gateway'}`
+            });
+            return;
+        }
 
         const [order] = await Order.create([{
             userId,
@@ -63,12 +89,14 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
         for (const shop of cart.shops) {
             let shopTotal = 0;
             const items = shop.items.map((i: any) => {
-                shopTotal += i.quantity * i.price;
+                const product = i.productId as any;
+                const price = i.price || product?.price || 0;
+                shopTotal += i.quantity * price;
                 return {
-                    productId: i.productId._id,
-                    name: i.productId.name,
-                    quantity: i.quantity,
-                    price: i.price
+                    productId: product?._id || i.productId,
+                    name: product?.name || 'Unknown Product',
+                    quantity: i.quantity || 0,
+                    price: price
                 };
             });
 
@@ -102,7 +130,8 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
             }
         });
     } catch (err: any) {
-        res.status(500).json({ success: false, message: err.message });
+        console.error("Checkout Controller Exception:", err);
+        res.status(500).json({ success: false, message: err.message || 'System error during checkout' });
     }
 };
 
