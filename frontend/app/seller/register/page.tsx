@@ -60,13 +60,13 @@ export default function SellerRegister() {
                         <Store className="h-6 w-6 text-white" />
                     </div>
                     <span className="font-heading font-extrabold text-2xl tracking-tight">
-                        GoleCentral
+                        GoleMarket
                     </span>
                 </Link>
 
                 <div className="relative z-10 text-white max-w-md">
                     <h2 className="text-4xl font-heading font-bold mb-4 leading-tight">Bring your store to the internet.</h2>
-                    <p className="text-slate-100 text-lg mb-8">Access thousands of local customers actively looking to support your business natively through GoleCentral.</p>
+                    <p className="text-slate-100 text-lg mb-8">Access thousands of local customers actively looking to support your business natively through GoleMarket.</p>
                 </div>
             </div>
 
@@ -80,7 +80,7 @@ export default function SellerRegister() {
                                     <Store className="h-6 w-6 text-slate-600" />
                                 </div>
                                 <span className="font-heading font-extrabold text-2xl tracking-tight text-gray-900">
-                                    GoleCentral
+                                    GoleMarket
                                 </span>
                             </Link>
                         </div>

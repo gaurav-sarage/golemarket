@@ -44,7 +44,7 @@ export default function ForgotPassword() {
                         <Store className="h-6 w-6 text-white" />
                     </div>
                     <span className="font-heading font-extrabold text-2xl tracking-tight">
-                        GoleCentral
+                        GoleMarket
                     </span>
                 </Link>
 
@@ -64,7 +64,7 @@ export default function ForgotPassword() {
                                     <Store className="h-6 w-6 text-primary-600" />
                                 </div>
                                 <span className="font-heading font-extrabold text-2xl tracking-tight text-gray-900">
-                                    GoleCentral
+                                    GoleMarket
                                 </span>
                             </Link>
                         </div>

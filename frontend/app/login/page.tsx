@@ -23,7 +23,7 @@ export default function Login() {
             const { data } = await api.post("/auth/user/login", { email, password });
             if (data.success) {
                 login(data.user);
-                toast.success("Welcome back to GoleCentral!", { duration: 4000 });
+                toast.success("Welcome back to GoleMarket!", { duration: 4000 });
                 router.push("/shops");
             }
         } catch (err: any) {
@@ -51,7 +51,7 @@ export default function Login() {
                         <Store className="h-6 w-6 text-white" />
                     </div>
                     <span className="font-heading font-extrabold text-2xl tracking-tight">
-                        GoleCentral
+                        GoleMarket
                     </span>
                 </Link>
 
@@ -77,7 +77,7 @@ export default function Login() {
                                     <Store className="h-6 w-6 text-primary-600" />
                                 </div>
                                 <span className="font-heading font-extrabold text-2xl tracking-tight text-gray-900">
-                                    GoleCentral
+                                    GoleMarket
                                 </span>
                             </Link>
                         </div>

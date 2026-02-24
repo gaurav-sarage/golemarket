@@ -5,7 +5,7 @@ import { ArrowRight, ShoppingBag, Store, Users, TrendingUp, ShieldCheck, Zap, La
 import Link from "next/link";
 import React, { useRef } from "react";
 
-const WHY_GOLECENTRAL = [
+const WHY_GOLEMARKET = [
     { id: 1, title: "Reach Thousands Locally", desc: "Instantly connect with customers actively shopping in your city.", img: "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&q=80&w=600" },
     { id: 2, title: "Seamless Order Management", desc: "A powerful dashboard to receive, track, and fulfill orders with ease.", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600" },
     { id: 3, title: "Zero Technical Hassle", desc: "We handle the hosting, payments, and security. You focus on selling.", img: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=600" },
@@ -91,11 +91,11 @@ export default function SellerHome() {
                 </div>
             </section>
 
-            {/* 2. Carousel: Why GoleCentral */}
+            {/* 2. Carousel: Why GoleMarket */}
             <section className="py-20 sm:py-24 pl-4 sm:pl-6 lg:pl-8 lg:pr-8 mx-auto w-full overflow-hidden max-w-[1400px]">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 sm:mb-12 gap-4 max-w-7xl mx-auto px-4 sm:px-0">
                     <div>
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold text-slate-900 tracking-tight mb-3">Why GoleCentral?</h2>
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold text-slate-900 tracking-tight mb-3">Why GoleMarket?</h2>
                         <p className="text-slate-600 font-medium text-lg">Everything you need to succeed in the modern local economy.</p>
                     </div>
                     <div className="hidden sm:flex items-center gap-2">
@@ -113,7 +113,7 @@ export default function SellerHome() {
                     className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar mx-auto max-w-7xl px-4 sm:px-0"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                    {WHY_GOLECENTRAL.map((item) => (
+                    {WHY_GOLEMARKET.map((item) => (
                         <div key={item.id} className="min-w-[300px] sm:min-w-[350px] bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl hover:border-indigo-100 transition-all duration-300 flex flex-col snap-center group">
                             <div className="h-56 overflow-hidden relative">
                                 <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-transparent transition-colors z-10 duration-500"></div>
@@ -180,7 +180,7 @@ export default function SellerHome() {
                         <span className="text-white font-extrabold text-xl tracking-tight">GoleMarket <span className="text-slate-400 font-medium text-lg">Merchant</span></span>
                     </div>
                     <div className="text-slate-400 text-sm font-medium">
-                        © 2026 GoleCentral Technologies. All rights reserved.
+                        © 2026 GoleMarket Technologies. All rights reserved.
                     </div>
                 </div>
             </footer>

@@ -148,7 +148,7 @@ export default function Home() {
       {/* How It Works (For Marketplace Clarity) */}
       <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold mb-4 sm:mb-6 text-gray-900 tracking-tight">How GoleCentral Works</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold mb-4 sm:mb-6 text-gray-900 tracking-tight">How GoleMarket Works</h2>
           <p className="text-lg sm:text-xl text-gray-600 font-medium">
             Your neighborhood marketplace in 4 simple steps.
           </p>

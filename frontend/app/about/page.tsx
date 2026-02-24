@@ -22,7 +22,7 @@ export default function AboutUs() {
                         Revitalizing <span className="text-primary-600">Local Commerce.</span>
                     </h1>
                     <p className="text-lg sm:text-2xl text-slate-600 font-medium max-w-3xl mx-auto leading-relaxed">
-                        GoleCentral is on a mission to democratize digital retail. We empower neighborhood shops
+                        GoleMarket is on a mission to democratize digital retail. We empower neighborhood shops
                         to thrive online while providing customers with authentic, high-quality local goods instantly.
                     </p>
                 </motion.div>
@@ -75,7 +75,7 @@ export default function AboutUs() {
                                 The internet accelerated big box retailers perfectly, but left the neighborhood mom & pop shop behind. Setting up complicated digital infrastructures, managing massive commission chunks, and running isolated websites proved too high a barrier.
                             </p>
                             <p>
-                                GoleCentral was built with a singular premise: What if your favorite corner cafe, local grocer, and boutique salon could all exist on one seamless platform with zero technical overhead?
+                                GoleMarket was built with a singular premise: What if your favorite corner cafe, local grocer, and boutique salon could all exist on one seamless platform with zero technical overhead?
                             </p>
                             <p>
                                 Today, we are proud to host hundreds of dedicated local storefronts, giving them infinite scalability, while granting customers an uncompromisingly beautiful and secure digital shopping experience.
@@ -88,7 +88,7 @@ export default function AboutUs() {
                             <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80" alt="Local store" className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
                             <div className="absolute bottom-8 left-8 right-8 text-white">
-                                <p className="font-bold text-xl leading-tight opacity-90">"GoleCentral brought my 30-year-old family grocery online in under 10 minutes. It changed everything."</p>
+                                <p className="font-bold text-xl leading-tight opacity-90">"GoleMarket brought my 30-year-old family grocery online in under 10 minutes. It changed everything."</p>
                             </div>
                         </div>
                     </div>

@@ -16,8 +16,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "GoleCentral",
-  description: "The digital storefront for GoleCentral - Your unified marketplace.",
+  title: "GoleMarket",
+  description: "The digital storefront for GoleMarket - Your unified marketplace.",
 };
 
 export default function RootLayout({

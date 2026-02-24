@@ -47,7 +47,7 @@ export default function Navbar() {
                                     <Store className="h-6 w-6 sm:h-7 sm:w-7 text-primary-600" />
                                 </div>
                                 <span className="font-heading font-extrabold text-xl sm:text-2xl tracking-tight text-gray-900 group-hover:text-primary-600 transition-colors">
-                                    GoleCentral
+                                    GoleMarket
                                 </span>
                             </Link>
                         </div>
