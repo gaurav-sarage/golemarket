@@ -1,17 +1,13 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import path from 'path';
-import authRoutes from './routes/authRoutes';
-import shopRoutes from './routes/shopRoutes';
-import productRoutes from './routes/productRoutes';
-import cartRoutes from './routes/cartRoutes';
-import orderRoutes from './routes/orderRoutes';
-import analyticsRoutes from './routes/analyticsRoutes';
 
 // Register Models for populate
 import './models/User';
@@ -22,7 +18,12 @@ import './models/Order';
 import './models/Cart';
 import './models/Section';
 
-dotenv.config();
+import authRoutes from './routes/authRoutes';
+import shopRoutes from './routes/shopRoutes';
+import productRoutes from './routes/productRoutes';
+import cartRoutes from './routes/cartRoutes';
+import orderRoutes from './routes/orderRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;

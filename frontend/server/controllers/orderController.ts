@@ -26,9 +26,13 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
         let totalAmount = 0;
         for (const shop of cart.shops) {
             for (const item of shop.items) {
-                const product = await Product.findById(item.productId);
+                const product = item.productId as any;
                 if (!product || product.stockQuantity < item.quantity) {
-                    throw new Error(`Product ${product?.name || item.productId} is out of stock`);
+                    res.status(400).json({
+                        success: false,
+                        message: `Product "${product?.name || 'Unknown'}" is out of stock`
+                    });
+                    return;
                 }
                 totalAmount += item.quantity * item.price;
             }
@@ -38,6 +42,8 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
         const tax = Math.round(totalAmount * 0.05);
         const handlingFee = 15;
         const finalAmount = totalAmount + tax + handlingFee;
+
+        console.log(`Creating Razorpay order for ${finalAmount} INR`);
 
         const razorpayOrder = await razorpay.orders.create({
             amount: finalAmount * 100, // paise
@@ -81,7 +87,7 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
             orderId: order._id,
             userId,
             razorpayOrderId: razorpayOrder.id,
-            amount: totalAmount,
+            amount: finalAmount,
             status: 'created'
         });
 

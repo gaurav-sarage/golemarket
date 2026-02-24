@@ -143,7 +143,9 @@ export default function Checkout() {
             const paymentObject = new (window as any).Razorpay(options);
             paymentObject.open();
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Checkout initialization failed");
+            console.error("Checkout Error:", err);
+            const errorMsg = err.response?.data?.message || err.message || "Checkout initialization failed";
+            toast.error(errorMsg);
         } finally {
             setIsLoading(false);
         }
