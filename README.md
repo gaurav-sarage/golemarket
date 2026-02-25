@@ -4,6 +4,10 @@
 
 A comprehensive, production-ready, and scalable e-commerce web application representing a physical marketplace with multiple shops operating within a unified platform. 
 
+## 🔗 Quick Links
+- **Customer Portal**: [https://golemarket.vercel.app/](https://golemarket.vercel.app/) (or your hosted URL, currently accessible locally at `http://localhost:3000/`)
+- **Merchant Dashboard**: [https://golemarket.vercel.app/seller/dashboard](https://golemarket.vercel.app/seller/dashboard) (or locally at `http://localhost:3000/seller/dashboard`)
+
 ## 🌟 Key Features
 
 - **Multi-Vendor Marketplace:** A unified platform where multiple shop owners can sell their products, providing a rich physical marketplace experience online.
