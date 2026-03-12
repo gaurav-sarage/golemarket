@@ -749,13 +749,40 @@ export default function SellerDashboard() {
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                                    <button
-                                        onClick={downloadSampleCSV}
-                                        className="text-primary-600 font-bold text-sm hover:underline flex items-center gap-2 group"
-                                    >
-                                        <div className="bg-white p-2 rounded-lg shadow-sm group-hover:bg-primary-50 transition-colors border border-gray-100"><Download className="w-4 h-4" /></div>
-                                        Download Example CSV
-                                    </button>
+                                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                                        <button
+                                            onClick={downloadSampleCSV}
+                                            className="text-primary-600 font-bold text-sm hover:underline flex items-center gap-2 group"
+                                        >
+                                            <div className="bg-white p-2 rounded-lg shadow-sm group-hover:bg-primary-50 transition-colors border border-gray-100"><Download className="w-4 h-4" /></div>
+                                            Download Example CSV
+                                        </button>
+
+                                        <div className="hidden sm:block w-px h-8 bg-gray-200" />
+
+                                        <input
+                                            type="file"
+                                            id="image-upload"
+                                            accept="image/*"
+                                            multiple
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const files = Array.from(e.target.files || []);
+                                                if (files.length > 0) {
+                                                    setCsvImageFiles(prev => [...prev, ...files]);
+                                                    toast.success(`Attached ${files.length} images!`);
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => document.getElementById('image-upload')?.click()}
+                                            className="text-secondary-600 font-bold text-sm hover:underline flex items-center gap-2 group"
+                                        >
+                                            <div className="bg-white p-2 rounded-lg shadow-sm group-hover:bg-secondary-50 transition-colors border border-gray-100"><Upload className="w-4 h-4" /></div>
+                                            Attach Valid Images
+                                        </button>
+                                    </div>
                                     <div className="flex gap-3 w-full sm:w-auto">
                                         <button
                                             onClick={() => { setIsImporting(false); setParsedCSVItems([]); }}
