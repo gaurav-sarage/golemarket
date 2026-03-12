@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle, Edit, Trash2, ArrowRight, Upload, Download, FileSpreadsheet } from "lucide-react";
+import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle, Edit, Trash2, ArrowRight, Upload, Download, FileSpreadsheet, Eye, Receipt } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,6 +18,7 @@ export default function SellerDashboard() {
     const [analytics, setAnalytics] = useState<any>(null);
     const [products, setProducts] = useState<any[]>([]);
     const [orders, setOrders] = useState<any[]>([]);
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders' | 'settings' | 'profile'>('analytics');
     const [isLoading, setIsLoading] = useState(false);
     const [needsSetup, setNeedsSetup] = useState(false);
@@ -1278,18 +1279,24 @@ export default function SellerDashboard() {
                                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Customer</th>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Amount</th>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-100">
                                         {orders.map(order => (
                                             <tr key={order._id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{order._id.substring(0, 10)}...</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{order._id.substring(order._id.length - 8).toUpperCase()}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.userId?.name || 'Unknown'}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">₹{order.totalAmount}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                                         {order.status}
                                                     </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                    <button onClick={() => setSelectedOrder(order)} className="text-primary-600 hover:text-primary-700 font-bold text-sm flex items-center gap-1 justify-end ml-auto">
+                                                        <Eye className="w-4 h-4" /> View Details
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -1300,6 +1307,77 @@ export default function SellerDashboard() {
                                 <div className="p-10 text-center text-gray-500 bg-gray-50">No orders received yet.</div>
                             )}
                         </div>
+
+                        {/* Order Details Modal for Merchant */}
+                        {selectedOrder && (
+                            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+                                <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden relative" onClick={e => e.stopPropagation()}>
+                                    <div className="flex justify-between items-center p-6 sm:p-8 border-b border-gray-100 bg-gray-50/50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-primary-600 border border-gray-100">
+                                                <Receipt className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-black text-gray-900 leading-tight">Order Details</h3>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">ID: {selectedOrder._id.toUpperCase()}</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => setSelectedOrder(null)} className="p-3 text-gray-400 hover:text-gray-600 hover:bg-white rounded-full transition-all border border-transparent hover:border-gray-100 shadow-sm">
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </div>
+
+                                    <div className="p-6 sm:p-8 bg-white">
+                                        <div className="flex justify-between items-start mb-8">
+                                            <div>
+                                                <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Customer Info</div>
+                                                <div className="text-lg font-black text-gray-900">{selectedOrder.userId?.name || 'Unknown Customer'}</div>
+                                                <div className="text-sm text-gray-600">{selectedOrder.userId?.email || 'No email provided'}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Order Date</div>
+                                                <div className="text-sm font-black text-gray-900">{new Date(selectedOrder.createdAt).toLocaleDateString()}</div>
+                                                <div className="text-xs font-bold text-gray-500 mt-1">{new Date(selectedOrder.createdAt).toLocaleTimeString()}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-gray-50 rounded-2xl p-6 mb-8 border border-gray-100 flex justify-between items-center">
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Current Status</p>
+                                                <span className={`px-4 py-1.5 text-xs font-black tracking-widest uppercase rounded-lg ${selectedOrder.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                    {selectedOrder.status}
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Revenue</p>
+                                                <p className="text-3xl font-black text-green-600 tracking-tight">₹{selectedOrder.totalAmount?.toFixed(2)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">Ordered Items ({selectedOrder.items?.length})</p>
+                                            <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                                                {selectedOrder.items?.map((item: any, idx: number) => (
+                                                    <div key={idx} className="flex justify-between items-center bg-gray-50/50 p-4 rounded-xl border border-gray-50">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center font-black text-primary-600 text-sm border border-primary-100">
+                                                                {item.quantity}x
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-gray-900 leading-tight">{item.name}</p>
+                                                                <p className="text-xs text-gray-500 font-medium tracking-wide">₹{item.price} per unit</p>
+                                                            </div>
+                                                        </div>
+                                                        <p className="font-black text-gray-900 border-l border-gray-200 pl-4 py-1">₹{(item.price * item.quantity).toFixed(2)}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

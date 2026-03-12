@@ -229,7 +229,9 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
 
 export const getUserOrders = async (req: Request, res: Response): Promise<void> => {
     try {
-        const orders = await Order.find({ userId: (req as any).user.id }).sort('-createdAt');
+        const orders = await ShopOrder.find({ userId: (req as any).user.id })
+            .populate('shopId', 'name location email phone')
+            .sort('-createdAt');
         res.status(200).json({ success: true, count: orders.length, data: orders });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });

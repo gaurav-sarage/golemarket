@@ -6,7 +6,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { format } from "date-fns";
 import {
     Package, Receipt, Clock, CheckCircle, User, Edit3, Save,
-    Smartphone, MapPin, Shield, Bell, Key, Plus, Trash2, Camera, Eye, EyeOff, AlertCircle, ShoppingBag
+    Smartphone, MapPin, Shield, Bell, Key, Plus, Trash2, Camera, Eye, EyeOff, AlertCircle, ShoppingBag, X, Download
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -21,6 +21,7 @@ export default function CustomerDashboard() {
     const [orders, setOrders] = useState<any[]>([]);
     const [isLoadingOrders, setIsLoadingOrders] = useState(true);
     const [activeTab, setActiveTab] = useState<Tab>('profile');
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
     // Profile State
     const [firstName, setFirstName] = useState("");
@@ -73,6 +74,27 @@ export default function CustomerDashboard() {
             console.error("Failed to fetch orders", err);
         } finally {
             setIsLoadingOrders(false);
+        }
+    };
+
+    const handleDownloadReceipt = async (order: any) => {
+        try {
+            const html2pdf = (await import('html2pdf.js')).default;
+            const element = document.getElementById('receipt-content');
+            if (element) {
+                const opt = {
+                    margin: 0.5,
+                    filename: `Receipt-${order._id.substring(order._id.length - 8)}.pdf`,
+                    image: { type: 'jpeg' as const, quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } as any
+                };
+                html2pdf().set(opt).from(element).save();
+                toast.success("Receipt downloaded successfully!");
+            }
+        } catch (error) {
+            console.error("PDF generation error", error);
+            toast.error("Failed to generate PDF receipt.");
         }
     };
 
@@ -576,11 +598,88 @@ export default function CustomerDashboard() {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <button className="text-primary-600 font-bold text-sm hover:underline">View Receipt</button>
+                                                <button onClick={() => setSelectedOrder(order)} className="text-primary-600 font-bold text-sm hover:underline flex items-center gap-1">
+                                                    View Receipt
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {/* Receipt Details Modal */}
+                        {selectedOrder && (
+                            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+                                <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden relative" onClick={e => e.stopPropagation()}>
+                                    <div className="flex justify-between items-center p-6 sm:p-8 border-b border-gray-100 bg-gray-50/50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-primary-600 border border-gray-100">
+                                                <Receipt className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-black text-gray-900 leading-tight">Order Receipt</h3>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">ID: {selectedOrder._id.toUpperCase()}</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => setSelectedOrder(null)} className="p-3 text-gray-400 hover:text-gray-600 hover:bg-white rounded-full transition-all border border-transparent hover:border-gray-100 shadow-sm">
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </div>
+
+                                    {/* Printable Content Area */}
+                                    <div id="receipt-content" className="p-6 sm:p-8 bg-white">
+                                        <div className="flex justify-between items-start mb-8">
+                                            <div>
+                                                <div className="text-2xl font-black text-primary-600 tracking-tight">GoleMarket</div>
+                                                <div className="text-sm font-bold text-gray-500 mt-1">{selectedOrder.shopId?.name || "Market Partner"}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-bold text-gray-900">{format(new Date(selectedOrder.createdAt), "MMMM d, yyyy")}</div>
+                                                <div className="text-sm font-bold text-gray-500 mt-1">{format(new Date(selectedOrder.createdAt), "h:mm a")}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-gray-50 rounded-2xl p-6 mb-8 border border-gray-100 flex justify-between items-center">
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                                                <span className={`px-4 py-1.5 text-xs font-black tracking-widest uppercase rounded-lg ${selectedOrder.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                    {selectedOrder.status}
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Fixed Amount</p>
+                                                <p className="text-3xl font-black text-gray-900 tracking-tight">₹{selectedOrder.totalAmount?.toFixed(2)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">Order Items ({selectedOrder.items?.length})</p>
+                                            <div className="space-y-4">
+                                                {selectedOrder.items?.map((item: any, idx: number) => (
+                                                    <div key={idx} className="flex justify-between items-center bg-white p-2">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500 text-xs">
+                                                                {item.quantity}x
+                                                            </div>
+                                                            <p className="font-bold text-sm text-gray-900">{item.name}</p>
+                                                        </div>
+                                                        <p className="font-bold text-sm text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50 flex justify-end">
+                                        <button
+                                            onClick={() => handleDownloadReceipt(selectedOrder)}
+                                            className="px-8 py-3.5 bg-primary-600 text-white font-black overflow-hidden shadow-xl shadow-primary-600/20 active:scale-95 transition-all text-sm tracking-wide rounded-xl flex items-center gap-2 group"
+                                        >
+                                            <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" /> Download PDF Receipt
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
