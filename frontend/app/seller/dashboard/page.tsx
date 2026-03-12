@@ -245,28 +245,20 @@ export default function SellerDashboard() {
             const item = parsedCSVItems[i];
             const formData = new FormData();
 
-            Object.keys(INITIAL_PRODUCT_STATE).forEach(key => {
-                if (item[key] !== undefined) formData.append(key, String(item[key]));
-                else formData.append(key, String((INITIAL_PRODUCT_STATE as any)[key]));
+            // Merge initial state with the parsed item overrides
+            const combinedPayload = { ...INITIAL_PRODUCT_STATE, ...item };
+
+            // Only append valid, non-empty values (prevents MongoDB CastErrors on empty string numbers)
+            Object.keys(combinedPayload).forEach(key => {
+                if (combinedPayload[key] !== '' && combinedPayload[key] !== undefined && combinedPayload[key] !== null) {
+                    formData.append(key, String(combinedPayload[key]));
+                }
             });
 
             formData.append('shopId', shop._id);
-            formData.append('categoryId', '600000000000000000000000');
-
-            formData.set('name', item.name);
-            formData.set('price', item.price);
-            if (item.salePrice) formData.set('salePrice', item.salePrice);
-            if (item.description) formData.set('description', item.description);
-            if (item.foodType) formData.set('foodType', item.foodType);
-            if (item.foodCategory) formData.set('foodCategory', item.foodCategory);
-            if (item.preparationTime) formData.set('preparationTime', item.preparationTime);
-            if (item.portionSize) formData.set('portionSize', item.portionSize);
-            if (item.spiceLevel) formData.set('spiceLevel', item.spiceLevel);
-            formData.set('isMustTry', String(item.isMustTry || false));
-            formData.set('isChefSpecial', String(item.isChefSpecial || false));
-            formData.set('isBestseller', String(item.isBestseller || false));
-            if (item.stockQuantity) formData.set('stockQuantity', item.stockQuantity);
-            formData.set('sku', item.sku);
+            if (!combinedPayload.categoryId) {
+                formData.append('categoryId', '600000000000000000000000');
+            }
 
             try {
                 const { data } = await api.post('/products', formData, {
@@ -276,7 +268,7 @@ export default function SellerDashboard() {
                     successCount++;
                 }
             } catch (err: any) {
-                console.error("Failed to import product", item.name, err);
+                console.error("Failed to import product", item.name, err.response?.data || err.message);
             }
             // Update progress
             setImportProgress(Math.round(((i + 1) / parsedCSVItems.length) * 100));
