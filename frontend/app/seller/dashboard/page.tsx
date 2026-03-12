@@ -638,7 +638,6 @@ export default function SellerDashboard() {
                                     <input
                                         type="file"
                                         id="csv-upload"
-                                        accept=".csv,image/*"
                                         multiple
                                         className="hidden"
                                         onChange={handleFileUpload}
