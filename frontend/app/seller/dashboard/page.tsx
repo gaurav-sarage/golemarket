@@ -59,6 +59,7 @@ export default function SellerDashboard() {
     const [isImporting, setIsImporting] = useState(false);
     const [importProgress, setImportProgress] = useState(0);
     const [parsedCSVItems, setParsedCSVItems] = useState<any[]>([]);
+    const [csvImageFiles, setCsvImageFiles] = useState<File[]>([]);
 
     useEffect(() => {
         if (!isAuthLoading && !isAuthenticated) {
@@ -141,12 +142,12 @@ export default function SellerDashboard() {
     };
 
     const downloadSampleCSV = () => {
-        const csvContent = "Name,Price,Sale Price,Description,Food Type,Food Category,Preparation Time,Portion Size,Spice Level,Must Try,Chef Special,Bestseller,Stock Quantity\n" +
-            "Cappuccino,150,120,Rich espresso with steamed milk foam.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,50\n" +
-            "Iced Latte,180,,Cold espresso with milk and ice.,Veg,Beverage,5,Large,None,FALSE,FALSE,TRUE,100\n" +
-            "Paneer Tikka Sandwich,200,180,Grilled sandwich with spicy paneer tikka.,Veg,Veg,15,Full,Medium,TRUE,TRUE,FALSE,30\n" +
-            "Chicken Club Sandwich,250,,Triple decker sandwich with grilled chicken.,Non-Veg,Non-Veg,20,Full,Mild,FALSE,TRUE,TRUE,20\n" +
-            "Classic Cold Coffee,160,140,Thick and creamy cold coffee blending.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,80";
+        const csvContent = "Name,Price,Sale Price,Description,Food Type,Food Category,Preparation Time,Portion Size,Spice Level,Must Try,Chef Special,Bestseller,Stock Quantity,Image File\n" +
+            "Cappuccino,150,120,Rich espresso with steamed milk foam.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,50,cappuccino.jpg\n" +
+            "Iced Latte,180,,Cold espresso with milk and ice.,Veg,Beverage,5,Large,None,FALSE,FALSE,TRUE,100,iced_latte.jpg\n" +
+            "Paneer Tikka Sandwich,200,180,Grilled sandwich with spicy delicious paneer tikka.,Veg,Veg,15,Full,Medium,TRUE,TRUE,FALSE,30,paneer_sandwich.png\n" +
+            "Chicken Club Sandwich,250,,Triple decker sandwich with grilled chicken.,Non-Veg,Non-Veg,20,Full,Mild,FALSE,TRUE,TRUE,20,\n" +
+            "Classic Cold Coffee,160,140,Thick and creamy cold coffee.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,80,cold_coffee.jpg";
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
@@ -159,11 +160,21 @@ export default function SellerDashboard() {
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
 
         // Reset file input value so same file can be selected again
         e.target.value = '';
+
+        const csvFile = files.find(f => f.name.endsWith('.csv'));
+        const imageFiles = files.filter(f => f.type.startsWith('image/'));
+
+        setCsvImageFiles(imageFiles);
+
+        if (!csvFile) {
+            toast.error("Please include a CSV file in your selection.");
+            return;
+        }
 
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -217,6 +228,7 @@ export default function SellerDashboard() {
                         else if (head.includes('chef special')) item.isChefSpecial = val.toLowerCase() === 'true';
                         else if (head.includes('bestseller')) item.isBestseller = val.toLowerCase() === 'true';
                         else if (head.includes('stock quantity') || head.includes('stock')) item.stockQuantity = val;
+                        else if (head.includes('image file') || head.includes('image filename')) item.imageFile = val;
                     });
 
                     if (item.name && item.price) {
@@ -234,7 +246,7 @@ export default function SellerDashboard() {
                 toast.error("Could not parse products from CSV.");
             }
         };
-        reader.readAsText(file);
+        reader.readAsText(csvFile);
     };
 
     const confirmImport = async () => {
@@ -258,6 +270,14 @@ export default function SellerDashboard() {
             formData.append('shopId', shop._id);
             if (!combinedPayload.categoryId) {
                 formData.append('categoryId', '600000000000000000000000');
+            }
+
+            // Find and append matching image if specified
+            if (item.imageFile) {
+                const matchedImage = csvImageFiles.find(f => f.name === item.imageFile);
+                if (matchedImage) {
+                    formData.append('images', matchedImage);
+                }
             }
 
             try {
@@ -618,7 +638,8 @@ export default function SellerDashboard() {
                                     <input
                                         type="file"
                                         id="csv-upload"
-                                        accept=".csv"
+                                        accept=".csv,image/*"
+                                        multiple
                                         className="hidden"
                                         onChange={handleFileUpload}
                                     />
@@ -685,28 +706,45 @@ export default function SellerDashboard() {
                                         <thead className="sticky top-0 bg-white shadow-sm border-b border-gray-100 z-10">
                                             <tr>
                                                 <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">Product Details</th>
-                                                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">Pricing</th>
-                                                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">Gen SKU</th>
+                                                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">Price & Stock</th>
+                                                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">Image Match</th>
                                                 <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase hidden sm:table-cell">Category</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100 bg-white">
-                                            {parsedCSVItems.map((item, idx) => (
-                                                <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                                                    <td className="px-6 py-4">
-                                                        <div className="text-sm font-black text-slate-900 mb-0.5">{item.name}</div>
-                                                        <div className="text-xs text-slate-500 line-clamp-1 max-w-[200px]">{item.description || 'No description'}</div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="text-sm font-black text-primary-600">₹{item.price}</div>
-                                                        {item.salePrice && <div className="text-xs text-slate-400 line-through">₹{item.salePrice}</div>}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-xs font-bold text-slate-400 font-mono tracking-wider">{item.sku}</td>
-                                                    <td className="px-6 py-4 text-xs font-bold text-slate-500 hidden sm:table-cell">
-                                                        <span className="bg-slate-100 px-2 py-1 rounded-md">{item.foodCategory || 'General'}</span>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                            {parsedCSVItems.map((item, idx) => {
+                                                const hasMatchingImage = item.imageFile && csvImageFiles.some(f => f.name === item.imageFile);
+                                                return (
+                                                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                                        <td className="px-6 py-4">
+                                                            <div className="text-sm font-black text-slate-900 mb-0.5">{item.name}</div>
+                                                            <div className="text-xs text-slate-500 line-clamp-1 max-w-[200px]">{item.description || 'No description'}</div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="text-sm font-black text-primary-600">₹{item.price}</div>
+                                                            <div className="text-xs text-slate-500 mt-1">{item.stockQuantity ? `${item.stockQuantity} in stock` : 'No stock info'}</div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-xs">
+                                                            {item.imageFile ? (
+                                                                hasMatchingImage ? (
+                                                                    <div className="flex items-center gap-1.5 text-green-600 font-bold bg-green-50 w-fit px-2 py-1 rounded-md">
+                                                                        <CheckCircle className="w-3.5 h-3.5" /> Found
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex items-center gap-1.5 text-amber-600 font-bold bg-amber-50 w-fit px-2 py-1 rounded-md" title={`Missing image: ${item.imageFile}`}>
+                                                                        <AlertCircle className="w-3.5 h-3.5" /> Missing
+                                                                    </div>
+                                                                )
+                                                            ) : (
+                                                                <span className="text-slate-400 italic">None</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-xs font-bold text-slate-500 hidden sm:table-cell">
+                                                            <span className="bg-slate-100 px-2 py-1 rounded-md">{item.foodCategory || 'General'}</span>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>

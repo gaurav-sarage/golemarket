@@ -1,9 +1,9 @@
-Name,Price,Sale Price,Description,Food Type,Food Category,Preparation Time,Portion Size,Spice Level,Must Try,Chef Special,Bestseller,Stock Quantity
-Cappuccino,150,120,Rich espresso with steamed milk foam.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,50
-Iced Latte,180,,Cold espresso with milk and ice.,Veg,Beverage,5,Large,None,FALSE,FALSE,TRUE,100
-Paneer Tikka Sandwich,200,180,Grilled sandwich with spicy delicious paneer tikka.,Veg,Veg,15,Full,Medium,TRUE,TRUE,FALSE,30
-Chicken Club Sandwich,250,,Triple decker sandwich with grilled chicken.,Non-Veg,Non-Veg,20,Full,Mild,FALSE,TRUE,TRUE,20
-Classic Cold Coffee,160,140,Thick and creamy cold coffee.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,80
-Avocado Toast,220,200,Smashed avocado on sourdough with chili flakes.,Veg,Veg,10,Regular,Mild,FALSE,TRUE,FALSE,25
-Spicy Arrabiata Pasta,280,,Penne pasta in spicy tomato basil sauce.,Veg,Veg,20,Full,Hot,TRUE,FALSE,TRUE,15
-Chocolate Brownie,120,100,Fudgy walnut chocolate brownie.,Veg,Veg,2,Regular,None,TRUE,TRUE,TRUE,40
+Name,Price,Sale Price,Description,Food Type,Food Category,Preparation Time,Portion Size,Spice Level,Must Try,Chef Special,Bestseller,Stock Quantity,Image File
+Cappuccino,150,120,Rich espresso with steamed milk foam.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,50,cappuccino.jpg
+Iced Latte,180,,Cold espresso with milk and ice.,Veg,Beverage,5,Large,None,FALSE,FALSE,TRUE,100,iced_latte.jpg
+Paneer Tikka Sandwich,200,180,Grilled sandwich with spicy delicious paneer tikka.,Veg,Veg,15,Full,Medium,TRUE,TRUE,FALSE,30,paneer_sandwich.png
+Chicken Club Sandwich,250,,Triple decker sandwich with grilled chicken.,Non-Veg,Non-Veg,20,Full,Mild,FALSE,TRUE,TRUE,20,
+Classic Cold Coffee,160,140,Thick and creamy cold coffee.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,80,cold_coffee.jpg
+Avocado Toast,220,200,Smashed avocado on sourdough with chili flakes.,Veg,Veg,10,Regular,Mild,FALSE,TRUE,FALSE,25,avocado_toast.jpg
+Spicy Arrabiata Pasta,280,,Penne pasta in spicy tomato basil sauce.,Veg,Veg,20,Full,Hot,TRUE,FALSE,TRUE,15,pasta.png
+Chocolate Brownie,120,100,Fudgy walnut chocolate brownie.,Veg,Veg,2,Regular,None,TRUE,TRUE,TRUE,40,brownie.jpg
