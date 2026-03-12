@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle, Edit, Trash2, ArrowRight } from "lucide-react";
+import { Package, ShoppingCart, TrendingUp, DollarSign, Plus, Store, Check, X, Clock, Calendar, Tag, Info, CheckCircle, AlertCircle, Edit, Trash2, ArrowRight, Upload, Download, FileSpreadsheet } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -55,6 +55,10 @@ export default function SellerDashboard() {
         spiceLevel: 'None', isChefSpecial: false, isMustTry: false, isBestseller: false
     };
     const [newProduct, setNewProduct] = useState<any>(INITIAL_PRODUCT_STATE);
+
+    const [isImporting, setIsImporting] = useState(false);
+    const [importProgress, setImportProgress] = useState(0);
+    const [parsedCSVItems, setParsedCSVItems] = useState<any[]>([]);
 
     useEffect(() => {
         if (!isAuthLoading && !isAuthenticated) {
@@ -134,6 +138,156 @@ export default function SellerDashboard() {
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Failed to create shop");
         }
+    };
+
+    const downloadSampleCSV = () => {
+        const csvContent = "Name,Price,Sale Price,Description,Food Type,Food Category,Preparation Time,Portion Size,Spice Level,Must Try,Chef Special,Bestseller,Stock Quantity\n" +
+            "Cappuccino,150,120,Rich espresso with steamed milk foam.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,50\n" +
+            "Iced Latte,180,,Cold espresso with milk and ice.,Veg,Beverage,5,Large,None,FALSE,FALSE,TRUE,100\n" +
+            "Paneer Tikka Sandwich,200,180,Grilled sandwich with spicy paneer tikka.,Veg,Veg,15,Full,Medium,TRUE,TRUE,FALSE,30\n" +
+            "Chicken Club Sandwich,250,,Triple decker sandwich with grilled chicken.,Non-Veg,Non-Veg,20,Full,Mild,FALSE,TRUE,TRUE,20\n" +
+            "Classic Cold Coffee,160,140,Thick and creamy cold coffee blending.,Veg,Beverage,5,Regular,None,TRUE,FALSE,TRUE,80";
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "cafe_products_sample.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Reset file input value so same file can be selected again
+        e.target.value = '';
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const csvData = event.target?.result as string;
+            // Simple split by newline
+            const rows = csvData.split('\n').filter(row => row.trim() !== '');
+            if (rows.length < 2) {
+                toast.error("CSV file seems empty or invalid.");
+                return;
+            }
+
+            const headerRow = rows[0].split(',').map(h => h.trim().toLowerCase());
+
+            const parsedItems = [];
+            for (let i = 1; i < rows.length; i++) {
+                const rowStr = rows[i];
+                let values = [];
+                let insideQuote = false;
+                let currentVal = '';
+                for (let j = 0; j < rowStr.length; j++) {
+                    const char = rowStr[j];
+                    if (char === '"') {
+                        insideQuote = !insideQuote;
+                    } else if (char === ',' && !insideQuote) {
+                        values.push(currentVal.trim());
+                        currentVal = '';
+                    } else {
+                        currentVal += char;
+                    }
+                }
+                values.push(currentVal.trim());
+
+                if (values.length > 0) {
+                    const item: any = {};
+                    headerRow.forEach((head, index) => {
+                        let val = values[index] || '';
+                        if (val.startsWith('"') && val.endsWith('"')) {
+                            val = val.substring(1, val.length - 1);
+                        }
+                        // normalize mapping
+                        if (head.includes('name')) item.name = val;
+                        else if (head.includes('sale price')) item.salePrice = val;
+                        else if (head.includes('price')) item.price = val;
+                        else if (head.includes('description')) item.description = val;
+                        else if (head.includes('food type')) item.foodType = val;
+                        else if (head.includes('food category')) item.foodCategory = val;
+                        else if (head.includes('preparation time')) item.preparationTime = val;
+                        else if (head.includes('portion size')) item.portionSize = val;
+                        else if (head.includes('spice level')) item.spiceLevel = val;
+                        else if (head.includes('must try')) item.isMustTry = val.toLowerCase() === 'true';
+                        else if (head.includes('chef special')) item.isChefSpecial = val.toLowerCase() === 'true';
+                        else if (head.includes('bestseller')) item.isBestseller = val.toLowerCase() === 'true';
+                        else if (head.includes('stock quantity') || head.includes('stock')) item.stockQuantity = val;
+                    });
+
+                    if (item.name && item.price) {
+                        // Dynamically generate SKU
+                        item.sku = `SKU-CSV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+                        parsedItems.push(item);
+                    }
+                }
+            }
+
+            if (parsedItems.length > 0) {
+                setParsedCSVItems(parsedItems);
+                setIsImporting(true);
+            } else {
+                toast.error("Could not parse products from CSV.");
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    const confirmImport = async () => {
+        setIsLoading(true);
+        let successCount = 0;
+
+        for (let i = 0; i < parsedCSVItems.length; i++) {
+            const item = parsedCSVItems[i];
+            const formData = new FormData();
+
+            Object.keys(INITIAL_PRODUCT_STATE).forEach(key => {
+                if (item[key] !== undefined) formData.append(key, String(item[key]));
+                else formData.append(key, String((INITIAL_PRODUCT_STATE as any)[key]));
+            });
+
+            formData.append('shopId', shop._id);
+            formData.append('categoryId', '600000000000000000000000');
+
+            formData.set('name', item.name);
+            formData.set('price', item.price);
+            if (item.salePrice) formData.set('salePrice', item.salePrice);
+            if (item.description) formData.set('description', item.description);
+            if (item.foodType) formData.set('foodType', item.foodType);
+            if (item.foodCategory) formData.set('foodCategory', item.foodCategory);
+            if (item.preparationTime) formData.set('preparationTime', item.preparationTime);
+            if (item.portionSize) formData.set('portionSize', item.portionSize);
+            if (item.spiceLevel) formData.set('spiceLevel', item.spiceLevel);
+            formData.set('isMustTry', String(item.isMustTry || false));
+            formData.set('isChefSpecial', String(item.isChefSpecial || false));
+            formData.set('isBestseller', String(item.isBestseller || false));
+            if (item.stockQuantity) formData.set('stockQuantity', item.stockQuantity);
+            formData.set('sku', item.sku);
+
+            try {
+                const { data } = await api.post('/products', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                if (data.success) {
+                    successCount++;
+                }
+            } catch (err: any) {
+                console.error("Failed to import product", item.name, err);
+            }
+            // Update progress
+            setImportProgress(Math.round(((i + 1) / parsedCSVItems.length) * 100));
+        }
+
+        toast.success(`Successfully imported ${successCount} out of ${parsedCSVItems.length} products`);
+        setIsImporting(false);
+        setParsedCSVItems([]);
+        setImportProgress(0);
+        setIsLoading(false);
+        fetchData();
     };
 
     const handleCreateProduct = async (e: React.FormEvent) => {
@@ -465,25 +619,131 @@ export default function SellerDashboard() {
 
                 {activeTab === 'products' && (
                     <div>
-                        <div className="flex justify-between items-center mb-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                             <h2 className="text-xl font-bold text-gray-900">Manage Inventory</h2>
-                            <button
-                                onClick={() => {
-                                    if (isAddingProduct) {
-                                        setIsAddingProduct(false);
-                                        setIsEditingProduct(false);
-                                        setEditingProductId(null);
-                                        setNewProduct(INITIAL_PRODUCT_STATE);
-                                    } else {
-                                        setIsAddingProduct(true);
-                                    }
-                                }}
-                                className="bg-secondary-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-secondary-700 transition-colors font-medium shadow-sm"
-                            >
-                                {isAddingProduct ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-                                {isAddingProduct ? 'Cancel' : 'Add New'}
-                            </button>
+                            <div className="flex gap-3 w-full sm:w-auto">
+                                <div>
+                                    <input
+                                        type="file"
+                                        id="csv-upload"
+                                        accept=".csv"
+                                        className="hidden"
+                                        onChange={handleFileUpload}
+                                    />
+                                    <button
+                                        onClick={() => document.getElementById('csv-upload')?.click()}
+                                        className="bg-white border text-gray-700 w-full sm:w-auto px-4 py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-300 transition-colors font-medium shadow-sm"
+                                    >
+                                        <FileSpreadsheet className="w-5 h-5 text-gray-400" /> Import CSV
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        if (isAddingProduct) {
+                                            setIsAddingProduct(false);
+                                            setIsEditingProduct(false);
+                                            setEditingProductId(null);
+                                            setNewProduct(INITIAL_PRODUCT_STATE);
+                                        } else {
+                                            setIsAddingProduct(true);
+                                        }
+                                    }}
+                                    className="bg-secondary-600 text-white w-full sm:w-auto px-4 py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-secondary-700 transition-colors font-medium shadow-sm"
+                                >
+                                    {isAddingProduct ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                                    {isAddingProduct ? 'Cancel' : 'Add New'}
+                                </button>
+                            </div>
                         </div>
+
+                        {/* CSV Review Modal/Inline */}
+                        {isImporting && (
+                            <div className="bg-white p-6 rounded-[2rem] shadow-xl border border-primary-100 mb-8 max-w-6xl mx-auto overflow-hidden relative">
+                                {isLoading && (
+                                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6">
+                                        <div className="w-3/4 max-w-md bg-gray-100 rounded-full h-4 mb-4 overflow-hidden outline outline-2 outline-offset-2 outline-gray-200">
+                                            <div
+                                                className="bg-primary-600 h-4 rounded-full transition-all duration-300"
+                                                style={{ width: `${importProgress}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-primary-600 font-bold animate-pulse">Importing products... {importProgress}%</p>
+                                    </div>
+                                )}
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 border-b border-gray-100 pb-4 gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-primary-50 rounded-2xl text-primary-600">
+                                            <Upload className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-gray-900 leading-tight mb-1">Review CSV Import</h3>
+                                            <p className="text-gray-500 text-sm font-medium">Found <span className="text-primary-600 font-bold">{parsedCSVItems.length} products</span> ready to import into your catalog.</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => { setIsImporting(false); setParsedCSVItems([]); }}
+                                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all self-end sm:self-auto"
+                                    >
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </div>
+
+                                <div className="max-h-[350px] overflow-y-auto w-full mb-8 border border-gray-100 rounded-2xl bg-gray-50/50 shadow-inner custom-scrollbar">
+                                    <table className="w-full text-left">
+                                        <thead className="sticky top-0 bg-white shadow-sm border-b border-gray-100 z-10">
+                                            <tr>
+                                                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">Product Details</th>
+                                                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">Pricing</th>
+                                                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">Gen SKU</th>
+                                                <th className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase hidden sm:table-cell">Category</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 bg-white">
+                                            {parsedCSVItems.map((item, idx) => (
+                                                <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-sm font-black text-slate-900 mb-0.5">{item.name}</div>
+                                                        <div className="text-xs text-slate-500 line-clamp-1 max-w-[200px]">{item.description || 'No description'}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-sm font-black text-primary-600">₹{item.price}</div>
+                                                        {item.salePrice && <div className="text-xs text-slate-400 line-through">₹{item.salePrice}</div>}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-xs font-bold text-slate-400 font-mono tracking-wider">{item.sku}</td>
+                                                    <td className="px-6 py-4 text-xs font-bold text-slate-500 hidden sm:table-cell">
+                                                        <span className="bg-slate-100 px-2 py-1 rounded-md">{item.foodCategory || 'General'}</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                    <button
+                                        onClick={downloadSampleCSV}
+                                        className="text-primary-600 font-bold text-sm hover:underline flex items-center gap-2 group"
+                                    >
+                                        <div className="bg-white p-2 rounded-lg shadow-sm group-hover:bg-primary-50 transition-colors border border-gray-100"><Download className="w-4 h-4" /></div>
+                                        Download Example CSV
+                                    </button>
+                                    <div className="flex gap-3 w-full sm:w-auto">
+                                        <button
+                                            onClick={() => { setIsImporting(false); setParsedCSVItems([]); }}
+                                            className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-white transition-all border border-gray-200 shadow-sm"
+                                        >
+                                            Discard
+                                        </button>
+                                        <button
+                                            onClick={confirmImport}
+                                            className="w-full sm:w-auto px-6 py-3 rounded-xl font-black text-white bg-primary-600 hover:bg-primary-700 shadow-xl shadow-primary-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Check className="w-5 h-5" /> Import {parsedCSVItems.length} Items
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {isAddingProduct && (
                             <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-gray-100 mb-8 max-w-6xl mx-auto">
@@ -898,8 +1158,8 @@ export default function SellerDashboard() {
                                                         <td className="px-8 py-6">
                                                             <div className="flex flex-col gap-1.5">
                                                                 <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider w-fit border ${stock > 10 ? 'bg-green-50 text-green-700 border-green-100' :
-                                                                        stock > 0 ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                                                                            'bg-red-50 text-red-700 border-red-100'
+                                                                    stock > 0 ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                                                        'bg-red-50 text-red-700 border-red-100'
                                                                     }`}>
                                                                     {stock > 0 ? `${stock} AVAILABLE` : 'OUT OF STOCK'}
                                                                 </span>
