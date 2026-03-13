@@ -32,6 +32,11 @@ export const protect = (req: Request, res: Response, next: NextFunction): void =
 
 export const authorize = (...roles: string[]) => {
     return (req: Request, res: Response, next: NextFunction): void => {
+        if ((req as any).user.role === 'superadmin') {
+            next();
+            return;
+        }
+
         if (!roles.includes((req as any).user.role)) {
             res.status(403).json({
                 success: false,

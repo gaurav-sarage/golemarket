@@ -130,15 +130,20 @@ export const loginShopOwner = async (req: Request, res: Response): Promise<void>
         const { email, password } = req.body;
         if (!email || !password) { res.status(400).json({ success: false, message: 'Please provide email and password' }); return; }
 
-        const owner = await ShopOwner.findOne({ email }).select('+password');
-        if (!owner) { res.status(401).json({ success: false, message: 'Shop Owner with this email not found' }); return; }
+        let account: any = await ShopOwner.findOne({ email }).select('+password');
+        
+        if (!account) {
+            account = await User.findOne({ email, role: 'superadmin' }).select('+password');
+        }
 
-        if (!owner.isVerified) { res.status(401).json({ success: false, message: 'Please verify your email address to log in.' }); return; }
+        if (!account) { res.status(401).json({ success: false, message: 'Shop Owner with this email not found' }); return; }
 
-        const isMatch = await bcrypt.compare(password, owner.password!);
+        if (!account.isVerified) { res.status(401).json({ success: false, message: 'Please verify your email address to log in.' }); return; }
+
+        const isMatch = await bcrypt.compare(password, account.password!);
         if (!isMatch) { res.status(401).json({ success: false, message: 'Incorrect password' }); return; }
 
-        sendTokenResponse(owner, 200, res);
+        sendTokenResponse(account, 200, res);
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -171,7 +176,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
         const payload = (req as any).user;
         const { name, phone, email, password, payoutDetails } = req.body;
 
-        let Model: any = payload.role === 'customer' || payload.role === 'admin' ? User : ShopOwner;
+        let Model: any = payload.role === 'customer' || payload.role === 'admin' || payload.role === 'superadmin' ? User : ShopOwner;
         const updates: any = {};
 
         if (name) updates.name = name;
@@ -213,7 +218,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     try {
         const payload = (req as any).user;
         let user;
-        if (payload.role === 'customer' || payload.role === 'admin') {
+        if (payload.role === 'customer' || payload.role === 'admin' || payload.role === 'superadmin') {
             user = await User.findById(payload.id).select('-password');
         } else {
             user = await ShopOwner.findById(payload.id).select('-password');
