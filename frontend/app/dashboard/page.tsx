@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import SuperAdminCustomerDashboard from "../../components/admin/SuperAdminCustomerDashboard";
 
 type Tab = 'profile' | 'addresses' | 'security' | 'preferences' | 'orders';
 
@@ -178,6 +179,10 @@ export default function CustomerDashboard() {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
             </div>
         );
+    }
+
+    if (user?.role === 'superadmin') {
+        return <SuperAdminCustomerDashboard />;
     }
 
     // Derived Order Stats

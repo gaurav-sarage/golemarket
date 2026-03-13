@@ -6,7 +6,7 @@ interface User {
     id: string;
     name: string;
     email: string;
-    role: 'customer' | 'shop_owner' | 'admin';
+    role: 'customer' | 'shop_owner' | 'admin' | 'superadmin';
     phone?: string;
     address?: {
         street: string;

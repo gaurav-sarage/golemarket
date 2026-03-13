@@ -11,6 +11,7 @@ import StoreSettings from "../../../components/dashboard/StoreSettings";
 import ProfileSettings from "../../../components/dashboard/ProfileSettings";
 import OnboardingWelcome from "../../../components/onboarding/OnboardingWelcome";
 import { isStoreCurrentlyOpen } from "../../../lib/storeUtils";
+import SuperAdminMerchantDashboard from "../../../components/admin/SuperAdminMerchantDashboard";
 
 export default function SellerDashboard() {
     const { user } = useAuthStore();
@@ -408,6 +409,10 @@ export default function SellerDashboard() {
     };
 
     if (isLoading) return <div className="min-h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
+
+    if (user?.role === 'superadmin') {
+        return <SuperAdminMerchantDashboard />;
+    }
 
     if (needsSetup) {
         return (
